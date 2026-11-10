@@ -51,3 +51,14 @@ Phase 2: Member Club database foundation and trusted cashier transaction workflo
 - No deployment or production build has been verified. A GitHub Actions workflow now runs `npm install` and `npm run build` on pushes/PRs to `main`; its first run is still pending/unobserved.
 - No authenticated staff end-to-end transaction test has been run because no MEMBER CLUB staff profile/account is provisioned. A negative test confirmed that an unauthenticated RPC call is rejected with SQLSTATE 42501.
 - Do not claim production readiness until build, RLS, auth, idempotency, reward issuance/redemption and deployment tests pass.
+
+## Preview UI delivery — 10 November 2026
+- Added `src/Admin.jsx` as a separate responsive admin dashboard preview.
+- Customer portal remains at `/`; admin preview is routed at `/admin` (also `/?view=admin`).
+- Added `netlify.toml` for Vite static build and SPA fallback.
+- Added responsive admin styles and mobile horizontal navigation.
+- All admin/member figures and transaction rows shown in these previews are mock/sample data. Admin actions are not connected to production data.
+- Netlify Free team confirmed; a Netlify site named `sandikale-member-club` was created (site ID `3979d338-7df7-4375-99b8-470c911e8abe`). The site has not yet received a deploy and no live preview URL is verified.
+- Repository-to-Netlify continuous deployment still needs to be connected in Netlify UI. Once connected, set build command `npm run build`, publish directory `dist`; `netlify.toml` already contains these values.
+- Build workflow was corrected to remove npm cache configuration because this repository has no committed lockfile. The latest CI run is queued/in progress; do not mark the build successful until the run concludes successfully.
+- Netlify environment-variable write attempt was rejected by the connected Netlify API. No Supabase environment variables were confirmed on the Netlify site. Do not expose any secret key; only a publishable/anon key may be configured for a future browser integration.
