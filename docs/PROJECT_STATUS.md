@@ -1,7 +1,7 @@
 # Project Status — 10 November 2026
 
 ## Current phase
-Phase 2: Member Club database foundation. Customer UI prototype remains the first user-facing surface.
+Phase 2: Member Club database foundation and trusted cashier transaction workflows. Customer UI prototype remains the first user-facing surface.
 
 ## Seven-layer delivery tracker
 
@@ -10,10 +10,10 @@ Phase 2: Member Club database foundation. Customer UI prototype remains the firs
 | 1. Monitoring | Not configured | Add deploy/build status visibility after hosting is selected |
 | 2. Deploy | Not configured | Connect this repository to Netlify Free; remain within free usage limits |
 | 3. Environment Variables | Template exists | Configure only the dedicated SANDIKALE-KASIR project URL and publishable key in hosting settings |
-| 4. Database | V1.0 foundation migration applied to SANDIKALE-KASIR | Add secure server workflows, auth, staff role provisioning and RLS tests |
-| 5. Test | Not run | Run Vite production build and database/RLS tests |
+| 4. Database | Foundation and cashier transaction workflows applied | Add customer onboarding, staff provisioning, rewards issuance/redemption workflows |
+| 5. Test | SQL structure/permissions inspected; unauthenticated RPC guard tested | Run authenticated staff integration tests, idempotency tests, RLS tests, then frontend build |
 | 6. Rules File | AGENTS.md maintained | Keep V1.0 and POS-isolation guardrails current |
-| 7. Application / Index | Customer UI prototype exists; not connected | Integrate Supabase auth and read-only member views, then transaction/reward server functions |
+| 7. Application / Index | Customer UI prototype exists; not connected | Integrate Supabase client and customer auth after a no-cost verification approach is selected |
 
 ## Verified repository facts
 - Canonical repository: `hairihabibullah2107-blip/SANDIKALE-MEMBER-CLUB`
@@ -26,18 +26,28 @@ Phase 2: Member Club database foundation. Customer UI prototype remains the firs
 - Approved backend project: `SANDIKALE-KASIR`, ref `zwtjqtwidfezvfhxmkyf`, region `ap-southeast-2`.
 - The other project named `sandikale` (lowercase) is the live store POS database and is strictly off-limits: do not inspect for writes, modify, migrate, pause, or delete it.
 - The five pre-existing POS-shaped tables in SANDIKALE-KASIR were observed with zero rows at inspection time. They were not deleted or modified.
-- Additive Member Club tables use the `mc_` prefix. The V1.0 foundation migration is stored at `supabase/migrations/202611100001_member_club_v1_foundation.sql`.
+- Additive Member Club tables use the `mc_` prefix. The V1.0 foundation migration and cashier workflow migration are stored under `supabase/migrations/`.
 - New `mc_` tables have RLS enabled. Browser roles have read-only grants; member-scoped SELECT policies are in place. Loyalty writes are reserved for trusted server workflows.
 - Supabase project URL: `https://zwtjqtwidfezvfhxmkyf.supabase.co`. Use the publishable key only in browser configuration. Never expose service-role/secret keys.
 - Free tier only: no paid upgrade, add-on, SMS, or WhatsApp provider activation without explicit approval.
 
-## Security findings requiring attention
-- Existing legacy table `public.profiles` in SANDIKALE-KASIR has RLS disabled while several policies exist. Supabase security advisors report this as a critical exposure. It was deliberately not auto-remediated because enabling RLS without reviewing existing POS policies could disrupt legacy behavior. Review its policies and decide remediation before exposing this project to browser clients.
-- `mc_stamp_rules` and `mc_audit_logs` intentionally have no browser policies; writes and privileged reads must be implemented through trusted server-side workflows.
-- No live phone OTP, secure QR validation, cashier transaction integration, reward redemption endpoint, or WhatsApp integration exists yet.
-- Phone OTP/SMS and WhatsApp may incur provider charges; defer until a confirmed no-cost option is available and approved.
+## Implemented trusted workflows
+- `public.mc_create_transaction(member_number, source_transaction_id, total_amount)`: requires an active owner/admin/cashier staff profile; validates member and positive amount; uses a stable source transaction ID for duplicate protection; records an audit event.
+- `public.mc_validate_transaction(transaction_id)`: locks the transaction row; rejects voided transactions; returns the prior result for already validated transactions; awards stamps from the currently active rule; records validation and audit events.
+- Both functions use SECURITY DEFINER with an empty search_path, fully qualified relations, and EXECUTE revoked from PUBLIC/anon; EXECUTE is granted only to authenticated. Each function independently checks the caller's active staff role.
+- Verification: inspected function security settings and grants; confirmed anon cannot execute and authenticated can execute; an unauthenticated call was rejected with SQLSTATE 42501 before any transaction was created.
+- Supabase security advisor reports the two SECURITY DEFINER functions as warnings because authenticated staff can execute them. This is intentional and guarded by the in-function staff-role checks; it must remain under review.
+- The Supabase advisor still reports the legacy `public.profiles` table with RLS disabled. Do not auto-enable or alter it without a separate review because it may affect old POS behavior.
+- `mc_stamp_rules` and `mc_audit_logs` intentionally have no browser policies; privileged access remains server-side.
+
+## Security and cost constraints
+- No service-role/secret key is exposed to frontend code.
+- Do not add customer phone OTP/SMS or WhatsApp delivery until a genuinely no-cost provider or alternative is confirmed. Never claim phone verification is active yet.
+- No staff provisioning or customer onboarding workflow exists yet; an owner/admin must be securely provisioned before cashier RPCs can be used.
+- No direct integration with the legacy POS order database exists. Cashier transaction creation is currently a separate MEMBER CLUB workflow.
 
 ## Known limitations
 - The customer portal still uses sample identity, stamp count, reward catalog and transaction history.
 - No deployment or production build has been verified.
-- Do not claim production readiness until build, RLS, auth, idempotency and redemption tests pass.
+- No authenticated staff end-to-end transaction test has been run because no MEMBER CLUB staff profile/account is provisioned.
+- Do not claim production readiness until build, RLS, auth, idempotency, reward issuance/redemption and deployment tests pass.
