@@ -11,7 +11,7 @@ Phase 2: Member Club database foundation and trusted cashier transaction workflo
 | 2. Deploy | Not configured | Connect this repository to Netlify Free; remain within free usage limits |
 | 3. Environment Variables | Template exists | Configure only the dedicated SANDIKALE-KASIR project URL and publishable key in hosting settings |
 | 4. Database | Foundation and cashier transaction workflows applied | Add customer onboarding, staff provisioning, rewards issuance/redemption workflows |
-| 5. Test | SQL structure/permissions inspected; unauthenticated RPC guard tested | Run authenticated staff integration tests, idempotency tests, RLS tests, then frontend build |
+| 5. Test | SQL structure/permissions inspected; unauthenticated RPC guard tested; GitHub Actions build workflow added but no run result is visible yet | Verify first CI run; then run authenticated staff integration tests, idempotency tests and RLS tests |
 | 6. Rules File | AGENTS.md maintained | Keep V1.0 and POS-isolation guardrails current |
 | 7. Application / Index | Customer UI prototype exists; not connected | Integrate Supabase client and customer auth after a no-cost verification approach is selected |
 
@@ -48,6 +48,6 @@ Phase 2: Member Club database foundation and trusted cashier transaction workflo
 
 ## Known limitations
 - The customer portal still uses sample identity, stamp count, reward catalog and transaction history.
-- No deployment or production build has been verified.
-- No authenticated staff end-to-end transaction test has been run because no MEMBER CLUB staff profile/account is provisioned.
+- No deployment or production build has been verified. A GitHub Actions workflow now runs `npm install` and `npm run build` on pushes/PRs to `main`; its first run is still pending/unobserved.
+- No authenticated staff end-to-end transaction test has been run because no MEMBER CLUB staff profile/account is provisioned. A negative test confirmed that an unauthenticated RPC call is rejected with SQLSTATE 42501.
 - Do not claim production readiness until build, RLS, auth, idempotency, reward issuance/redemption and deployment tests pass.
