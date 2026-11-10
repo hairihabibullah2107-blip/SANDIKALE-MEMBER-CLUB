@@ -1,5 +1,9 @@
 # SANDIKALE MEMBER CLUB
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/3979d338-7df7-4375-99b8-470c911e8abe/deploy-status)](https://app.netlify.com/projects/sandikale-member-club/deploys)
+
+**Repository:** [SANDIKALE-MEMBER-CLUB](https://github.com/hairihabibullah2107-blip/SANDIKALE-MEMBER-CLUB) · **Branch:** [main](https://github.com/hairihabibullah2107-blip/SANDIKALE-MEMBER-CLUB/tree/main) · **Deploy status:** [Netlify](https://app.netlify.com/projects/sandikale-member-club/deploys)
+
 Customer-first loyalty and membership portal for SANDIKALE.
 
 ## Current phase
