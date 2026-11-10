@@ -52,28 +52,6 @@ export default function AdminAuth({ children }) {
     setPassword("");
   }
 
-  async function createOwner(event) {
-    event.preventDefault(); setBusy(true); setError(""); setNotice("");
-    if (email.trim().toLowerCase() !== OWNER_EMAIL) {
-      setBusy(false); setError("Pembuatan akun dibatasi untuk email Owner yang telah ditetapkan."); return;
-    }
-    if (password.length < 6) {
-      setBusy(false); setError("PIN/password harus minimal 6 karakter."); return;
-    }
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email: OWNER_EMAIL,
-      password,
-      options: { data: { display_name: "SANDIKALE Owner" } }
-    });
-    setBusy(false); setPassword("");
-    if (signUpError) {
-      setError(signUpError.message.toLowerCase().includes("already") ? "Akun Owner sudah pernah dibuat. Gunakan Masuk atau atur ulang password dari Supabase Auth." : "Pembuatan akun gagal. Periksa pengaturan Auth Supabase.");
-      return;
-    }
-    if (data.session) setNotice("Akun Owner berhasil dibuat. Sistem sedang memeriksa akses Owner…");
-    else setNotice("Permintaan akun Owner terkirim. Buka email Owner dan klik tautan verifikasi dari Supabase, lalu kembali ke halaman ini untuk masuk.");
-  }
-
   async function signOut() {
     await supabase.auth.signOut(); setSession(null); setProfile(null); setError(""); setNotice("");
   }
@@ -93,7 +71,7 @@ export default function AdminAuth({ children }) {
       {notice && <div style={noticeBox}>{notice}</div>}
       <button disabled={busy} style={submit}>{busy ? "Memproses…" : "Masuk sebagai Owner"}</button>
     </form>
-    <button disabled={busy} onClick={createOwner} style={secondary}>{busy ? "Memproses…" : "Buat Akun Owner Pertama Kali"}</button>
+    <div style={noticeBox}>Pembuatan akun Owner sedang dikunci sementara agar tidak membuat akun kasir pada database POS lama. Akun Owner harus dibuat melalui jalur autentikasi yang terpisah.</div>
     <p style={{fontSize:11,color:"#999",lineHeight:1.6,marginTop:20}}>Pendaftaran dibatasi hanya untuk alamat email Owner yang telah ditetapkan. Gunakan PIN rahasia dan ganti setelah login pertama.</p>
   </div></div>;
 }
@@ -102,6 +80,5 @@ const panel={width:"min(100%,430px)",background:"#fff",padding:32,border:"1px so
 const label={display:"block",fontSize:10,letterSpacing:1.5,fontWeight:700,color:"#666",margin:"16px 0 7px"};
 const field={width:"100%",boxSizing:"border-box",padding:"14px 13px",border:"1px solid #ddd",fontSize:15,background:"#fff",color:"#111",outlineColor:"#222"};
 const submit={width:"100%",marginTop:22,padding:15,background:"#171717",color:"#fff",border:0,fontWeight:700,fontSize:13,cursor:"pointer"};
-const secondary={width:"100%",marginTop:10,padding:14,background:"#fff",color:"#171717",border:"1px solid #bbb",fontWeight:700,fontSize:12,cursor:"pointer"};
 const errorBox={marginTop:16,padding:12,background:"#fff1ef",border:"1px solid #efc7c1",color:"#8c3028",fontSize:12,lineHeight:1.5};
 const noticeBox={marginTop:16,padding:12,background:"#eff8f0",border:"1px solid #cce4d0",color:"#245b31",fontSize:12,lineHeight:1.5};
