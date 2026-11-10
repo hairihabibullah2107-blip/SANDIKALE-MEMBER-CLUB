@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 const members = [
   { id: "SK-000001", name: "Alya Putri", phone: "08•• •••• 2844", stamps: 8, status: "Aktif" },
