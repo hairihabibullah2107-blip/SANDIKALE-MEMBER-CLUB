@@ -49,10 +49,17 @@ export default function AdminAuth({ children }) {
     if (email.trim().toLowerCase() !== OWNER_EMAIL) {
       setBusy(false); setError("Gunakan email Owner yang telah ditetapkan."); return;
     }
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email: OWNER_EMAIL, password });
-    setBusy(false);
-    if (signInError) setError("Login belum berhasil. Periksa PIN/password atau pastikan akun Owner sudah dibuat dan email diverifikasi.");
-    setPassword("");
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: OWNER_EMAIL, password });
+      if (signInError) {
+        setError(`Autentikasi gagal: ${signInError.message}`);
+      }
+    } catch (err) {
+      setError(`Tidak dapat menghubungi layanan login: ${err?.message || "Periksa koneksi internet lalu coba lagi."}`);
+    } finally {
+      setBusy(false);
+      setPassword("");
+    }
   }
 
   async function signOut() {
