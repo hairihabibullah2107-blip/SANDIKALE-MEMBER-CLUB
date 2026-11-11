@@ -86,7 +86,7 @@ function RegistrationPage() {
   const [error,setError]=useState("");
   const [member,setMember]=useState(null);
   const [copied,setCopied]=useState(false);
-  const memberUrl=member ? window.location.origin+"/?token="+encodeURIComponent(member.public_token) : "";
+  const memberUrl=member ? window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(member.public_token) : "";
   async function submit(e){
     e.preventDefault();setSaving(true);setError("");
     const {data,error:rpcError}=await supabase.rpc("mc_register_member",{
