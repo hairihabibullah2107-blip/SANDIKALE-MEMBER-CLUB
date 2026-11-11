@@ -49,7 +49,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     setLoading(true); setError("");
     const results = await Promise.all([
       supabase.from("mc_members").select("id,member_code,public_token,full_name,phone,email,status,total_stamps,total_points,joined_at").order("created_at",{ascending:false}).limit(500),
-      supabase.from("mc_transactions").select("id,invoice_number,member_id,total,transaction_date,points_earned").order("transaction_date",{ascending:false}).limit(100),
+      supabase.from("mc_transactions").select("id,invoice_number,member_id,total,transaction_date,points_earned").order("transaction_date",{ascending:false}).limit(1000),
       supabase.from("mc_members").select("id",{count:"exact",head:true}),
       supabase.from("mc_transactions").select("id",{count:"exact",head:true}),
       supabase.from("mc_stamps").select("id",{count:"exact",head:true}),
@@ -128,7 +128,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     notify(status==="fulfilled"?"Reward diserahkan; poin dipotong.":status==="approved"?"Penukaran disetujui.":"Penukaran dibatalkan.");await loadData();
   }
   function memberShareUrl(m){return window.location.origin+"/member?token="+encodeURIComponent(m.public_token);}
-  async function shareMember(m){const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link member berhasil disalin.");}catch{setQrMember(m);}}
+  async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. QR siap dibagikan.");}catch{notify("QR member siap ditampilkan.");}}
 
   async function saveRules(event) {
     event.preventDefault(); setSaving(true); setError("");
