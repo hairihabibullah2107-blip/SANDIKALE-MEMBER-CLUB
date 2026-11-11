@@ -53,7 +53,7 @@ function StampPanel({ stamps, target }) {
       <div className="section-heading"><div><span className="eyebrow">YOUR COLLECTION</span><h3>Koleksi stamp</h3></div><span className="stamp-count">{stamps}<i> / {target}</i></span></div>
       <p className="muted small-copy">Setiap transaksi valid membawa kamu lebih dekat ke reward berikutnya.</p>
       <div className="stamp-grid" aria-label={`${stamps} dari ${target} stamp terkumpul`}>
-        {Array.from({ length: target }, (_, index) => <div className={`stamp-slot ${index < stamps ? "earned" : ""}`} key={index}>{index < stamps ? <span> S </span> : <small>{String(index + 1).padStart(2, "0")}</small>}</div>)}
+        {Array.from({ length: target }, (_, index) => <div className={`stamp-slot ${index < stamps ? "earned" : ""}`} key={index}>{index < stamps ? <span className="stamp-brand-symbol" aria-label="SANDIKALE"><svg viewBox="0 0 1365 2048" aria-hidden="true"><path d="M465,0 L342,124 L558,341 L341,558 L124,342 L0,465 L558,1023 L404,1179 L527,1302 L682,1147 L900,1365 L682,1582 L341,1241 L0,1582 L124,1705 L341,1489 L558,1706 L342,1924 L465,2047 L682,1830 L899,2047 L1023,1923 L806,1706 L1023,1489 L1240,1705 L1364,1582 L806,1024 L961,868 L837,745 L682,900 L465,682 L683,465 L1024,805 L1364,465 L1240,342 L1023,558 L806,341 L1023,124 L899,0 L682,217 Z" fill="currentColor"/></svg></span> : <small>{String(index + 1).padStart(2, "0")}</small>}</div>)}
       </div>
       <div className="progress-meta"><span>Progress reward</span><strong>{Math.round(stamps / target * 100)}%</strong></div>
       <div className="progress-track"><span style={{ width: `${Math.min(100, stamps / target * 100)}%` }} /></div>
