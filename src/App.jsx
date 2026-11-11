@@ -79,8 +79,58 @@ function PublicMemberCard({token}) {
   return <main className="public-member-page"><div className="public-member-card"><Brand/><span className="eyebrow">DIGITAL MEMBERSHIP CARD</span>{loading?<p>Memuat kartu member…</p>:error?<p>{error}</p>:<><div className="public-member-monogram">S</div><h1>{member.full_name}</h1><strong>{member.member_code}</strong><div className="public-member-stats"><div><b>{member.total_stamps}</b><small>STAMP</small></div><div><b>{member.total_points}</b><small>POIN</small></div></div><p className="muted">Member aktif SANDIKALE MEMBER CLUB</p></>}<small className="public-member-footer">SANDIKALE • MEMBER CLUB</small></div></main>;
 }
 
+
+function RegistrationPage() {
+  const [form,setForm]=useState({full_name:"",phone:"",email:""});
+  const [saving,setSaving]=useState(false);
+  const [error,setError]=useState("");
+  const [member,setMember]=useState(null);
+  const [copied,setCopied]=useState(false);
+  const memberUrl=member ? window.location.origin+"/?token="+encodeURIComponent(member.public_token) : "";
+  async function submit(e){
+    e.preventDefault();setSaving(true);setError("");
+    const {data,error:rpcError}=await supabase.rpc("mc_register_member",{
+      p_full_name:form.full_name.trim(),p_phone:form.phone.trim(),p_email:form.email.trim()||null
+    });
+    setSaving(false);
+    if(rpcError){setError(rpcError.message||"Pendaftaran belum berhasil.");return;}
+    setMember(data);
+  }
+  async function copyLink(){
+    try{await navigator.clipboard.writeText(memberUrl);setCopied(true);}catch{setError("Browser tidak mengizinkan salin otomatis. Salin tautan secara manual.");}
+  }
+  const field={width:"100%",padding:"13px 14px",border:"1px solid #deded7",borderRadius:3,fontSize:14,background:"#fff"};
+  return <main style={{minHeight:"100vh",background:"#f4f3ef",padding:"32px 18px",display:"grid",placeItems:"center",fontFamily:"'DM Sans',sans-serif"}}>
+    <section style={{width:"100%",maxWidth:460,background:"#fff",padding:28,border:"1px solid #e7e6df",boxShadow:"0 18px 50px #0000000a"}}>
+      <Brand/><div style={{marginTop:30,fontSize:10,letterSpacing:2,color:"#96968e",fontWeight:700}}>JOIN THE COMMUNITY</div>
+      {member ? <div style={{textAlign:"center",paddingTop:18}}>
+        <div style={{fontSize:30,fontWeight:800}}>Selamat bergabung.</div>
+        <p style={{color:"#777",lineHeight:1.6}}>Keanggotaan SANDIKALE berhasil dibuat.</p>
+        <div style={{background:"#191919",color:"#fff",padding:22,margin:"22px 0"}}>
+          <div style={{fontSize:10,letterSpacing:2,color:"#aaa"}}>MEMBER ID</div><h2 style={{margin:"8px 0"}}>{member.member_code}</h2>
+          <img alt="QR kartu member" style={{width:190,height:190,background:"#fff",padding:9,margin:"8px auto"}} src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(memberUrl)}/>
+          <div style={{fontSize:12,color:"#ddd"}}>{member.full_name}</div>
+        </div>
+        <button onClick={copyLink} style={{width:"100%",padding:14,background:"#191919",color:"#fff",border:0}}>{copied?"Link berhasil disalin":"Salin link kartu member"}</button>
+        <p style={{fontSize:12,color:"#888",lineHeight:1.6}}>Simpan tautan ini. Tunjukkan QR tersebut kepada kasir setiap kali bertransaksi agar stamp tercatat.</p>
+      </div> : <form onSubmit={submit} style={{display:"grid",gap:13,marginTop:22}}>
+        <h1 style={{fontSize:28,lineHeight:1.15,margin:"0 0 4px",letterSpacing:-1}}>Daftar Member Club</h1>
+        <p style={{fontSize:13,color:"#777",lineHeight:1.6,margin:"0 0 8px"}}>Gabung gratis dan kumpulkan stamp setiap transaksi yang memenuhi ketentuan SANDIKALE.</p>
+        <label style={{fontSize:12,fontWeight:600}}>Nama lengkap<input required minLength={2} autoComplete="name" style={{...field,display:"block",marginTop:7}} value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} placeholder="Nama sesuai identitas"/></label>
+        <label style={{fontSize:12,fontWeight:600}}>Nomor WhatsApp<input required type="tel" autoComplete="tel" style={{...field,display:"block",marginTop:7}} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08xxxxxxxxxx"/></label>
+        <label style={{fontSize:12,fontWeight:600}}>Email (opsional)<input type="email" autoComplete="email" style={{...field,display:"block",marginTop:7}} value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@contoh.com"/></label>
+        {error&&<p style={{color:"#a33",fontSize:12,background:"#fff1f0",padding:10}}>{error}</p>}
+        <button disabled={saving} style={{padding:15,background:"#191919",color:"#fff",border:0,fontWeight:700,marginTop:5}}>{saving?"Mendaftarkan…":"Daftar sebagai member"}</button>
+        <small style={{color:"#999",lineHeight:1.5}}>Dengan mendaftar, kamu menyetujui data nama dan nomor WhatsApp digunakan untuk administrasi keanggotaan SANDIKALE.</small>
+      </form>}
+    </section>
+  </main>;
+}
+
 export default function App() {
-  const publicToken = new URLSearchParams(window.location.search).get("token");
+  const params = new URLSearchParams(window.location.search);
+  const publicToken = params.get("token");
+  if (params.get("register") === "1" || window.location.pathname.replace(/\\/$/,"") === "/daftar") return <RegistrationPage/>;
   if (publicToken) return <PublicMemberCard token={publicToken}/>;
   const [tab, setTab] = useState("home");
   const [stamps] = useState(6);
