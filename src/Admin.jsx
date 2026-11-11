@@ -36,6 +36,14 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   const [form,setForm] = useState({full_name:"",phone:"",email:""});
   const [minimum,setMinimum] = useState("85000");
   const [stampsPerTransaction,setStampsPerTransaction] = useState("1");
+  const [rewards,setRewards]=useState([]);
+  const [claims,setClaims]=useState([]);
+  const [showRewardForm,setShowRewardForm]=useState(false);
+  const [rewardForm,setRewardForm]=useState({name:"",description:"",points_cost:"10",stock:""});
+  const [showClaimForm,setShowClaimForm]=useState(false);
+  const [claimForm,setClaimForm]=useState({member_id:"",reward_id:""});
+  const [reportMonth,setReportMonth]=useState(new Date().toISOString().slice(0,7));
+  const [qrMember,setQrMember]=useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true); setError("");
@@ -46,13 +54,16 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
       supabase.from("mc_transactions").select("id",{count:"exact",head:true}),
       supabase.from("mc_stamps").select("id",{count:"exact",head:true}),
       supabase.from("mc_rewards").select("id",{count:"exact",head:true}),
-      supabase.from("mc_reward_claims").select("id",{count:"exact",head:true})
+      supabase.from("mc_reward_claims").select("id",{count:"exact",head:true}),
+      supabase.from("mc_rewards").select("id,name,description,points_cost,stock,is_active,created_at").order("created_at",{ascending:false}),
+      supabase.from("mc_reward_claims").select("id,member_id,reward_id,points_spent,status,claimed_at,processed_at,notes,mc_members(full_name,member_code),mc_rewards(name)").order("claimed_at",{ascending:false}).limit(500)
     ]);
     const firstError = results.find(r => r.error)?.error;
     if (firstError) setError("Data belum dapat dimuat: " + firstError.message);
     const memberRows = results[0].data || [];
     const transactionRows = results[1].data || [];
     setMembers(memberRows); setTransactions(transactionRows);
+    setRewards(results[7].data || []); setClaims(results[8].data || []);
     setCounts({
       members: results[2].count ?? memberRows.length,
       transactions: results[3].count ?? transactionRows.length,
@@ -88,6 +99,36 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     notify("Member berhasil ditambahkan ke database.");
     await loadData();
   }
+
+  async function saveReward(event) {
+    event.preventDefault(); setSaving(true); setError("");
+    const payload={name:rewardForm.name.trim(),description:rewardForm.description.trim()||null,points_cost:Number(rewardForm.points_cost),stock:rewardForm.stock===""?null:Number(rewardForm.stock),is_active:true};
+    const {error:e}=await supabase.from("mc_rewards").insert(payload); setSaving(false);
+    if(e){setError("Reward gagal disimpan: "+e.message);return;}
+    setRewardForm({name:"",description:"",points_cost:"10",stock:""});setShowRewardForm(false);notify("Reward ditambahkan.");await loadData();
+  }
+  async function toggleReward(r) {
+    const {error:e}=await supabase.from("mc_rewards").update({is_active:!r.is_active,updated_at:new Date().toISOString()}).eq("id",r.id);
+    if(e){setError(e.message);return;} notify("Status reward diperbarui.");await loadData();
+  }
+  async function createClaim(event) {
+    event.preventDefault();setSaving(true);setError("");
+    const r=rewards.find(x=>x.id===claimForm.reward_id),m=members.find(x=>x.id===claimForm.member_id);
+    if(!r||!m){setSaving(false);setError("Pilih member dan reward.");return;}
+    if(Number(m.total_points||0)<r.points_cost){setSaving(false);setError("Poin member tidak mencukupi.");return;}
+    if(r.stock!==null&&r.stock<1){setSaving(false);setError("Stok reward habis.");return;}
+    const {error:e}=await supabase.from("mc_reward_claims").insert({member_id:m.id,reward_id:r.id,points_spent:r.points_cost,status:"pending"});
+    setSaving(false);if(e){setError(e.message);return;}
+    setShowClaimForm(false);setClaimForm({member_id:"",reward_id:""});notify("Penukaran dicatat.");await loadData();
+  }
+  async function processClaim(cl,status) {
+    setSaving(true);setError("");
+    const {error:e}=await supabase.rpc("mc_process_reward_claim",{p_claim_id:cl.id,p_status:status});
+    setSaving(false);if(e){setError("Proses penukaran gagal: "+e.message);return;}
+    notify(status==="fulfilled"?"Reward diserahkan; poin dipotong.":status==="approved"?"Penukaran disetujui.":"Penukaran dibatalkan.");await loadData();
+  }
+  function memberShareUrl(m){return window.location.origin+"/member?token="+encodeURIComponent(m.public_token);}
+  async function shareMember(m){const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link member berhasil disalin.");}catch{setQrMember(m);}}
 
   async function saveRules(event) {
     event.preventDefault(); setSaving(true); setError("");
