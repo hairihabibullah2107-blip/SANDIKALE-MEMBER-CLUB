@@ -156,7 +156,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     if(!r||!m){setSaving(false);setError("Pilih member dan reward.");return;}
     if(Number(m.total_points||0)<r.points_cost){setSaving(false);setError("Poin member tidak mencukupi.");return;}
     if(r.stock!==null&&r.stock<1){setSaving(false);setError("Stok reward habis.");return;}
-    const {error:e}=await supabase.from("mc_reward_claims").insert({member_id:m.id,reward_id:r.id,points_spent:r.points_cost,status:"pending"});
+    const {error:e}=await supabase.rpc("mc_create_reward_claim",{p_member_id:m.id,p_reward_id:r.id});
     setSaving(false);if(e){setError(e.message);return;}
     setShowClaimForm(false);setClaimForm({member_id:"",reward_id:""});notify("Penukaran dicatat.");await loadData();
   }
