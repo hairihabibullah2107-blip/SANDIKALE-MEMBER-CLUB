@@ -67,14 +67,14 @@ export default function AdminAuth({ children }) {
     <section className="owner-visual">
       <div className="owner-brand"><Brand /></div>
       <div className="owner-copy"><span className="eyebrow">PRIVATE WORKSPACE</span><h1>Good work.<br/>Lasting loyalty.</h1><p>Kelola hubungan pelanggan, program stamp, dan reward SANDIKALE dalam satu ruang kerja.</p></div>
-      <div className="owner-visual-foot">SANDIKALE MEMBER CLUB · OWNER ACCESS</div>
+      <div className="owner-visual-foot">SANDIKALE MEMBER CLUB · STAFF ACCESS</div>
     </section>
     <section className="owner-login-side">
       <div className="owner-login-card">
         <div className="owner-mobile-brand"><Brand /></div>
         <span className="eyebrow">ADMINISTRATOR PORTAL</span>
         <h2>Selamat datang.</h2>
-        <p>Masuk menggunakan akun Owner untuk melanjutkan ke dashboard pengelolaan.</p>
+        <p>Masuk menggunakan akun staf terdaftar untuk melanjutkan ke ruang kerja.</p>
         <form onSubmit={signIn}>
           <label htmlFor="owner-email">EMAIL OWNER</label>
           <input id="owner-email" autoComplete="username" type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email akun staf" />
@@ -83,7 +83,7 @@ export default function AdminAuth({ children }) {
           {error && <div className="owner-error" role="alert">{error}</div>}
           <button className="owner-submit" disabled={busy}>{busy ? "MEMERIKSA AKUN…" : "MASUK KE DASHBOARD"}</button>
         </form>
-        <div className="owner-notice">Akses ini khusus Owner dan Admin terdaftar. Pendaftaran akun publik dinonaktifkan.</div>
+        <div className="owner-notice">Akses ini khusus Owner, Admin, dan Kasir terdaftar. Pendaftaran akun publik dinonaktifkan.</div>
         <p className="owner-security">Jangan bagikan PIN atau password kepada siapa pun. Gunakan perangkat pribadi dan keluar setelah selesai.</p>
       </div>
     </section>
