@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { supabase } from "./supabase.js";
 
 const initialHistory = [
   { id: "TRX-1024", date: "08 Nov 2026", detail: "Custom Kaos • 1 pcs", stamp: "+1 stamp", status: "Terverifikasi" },
@@ -70,7 +71,17 @@ function Modal({ title, children, onClose }) {
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><div className="modal" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}><div className="modal-head"><h3>{title}</h3><button className="icon-button" onClick={onClose} aria-label="Tutup"><Icon name="close" /></button></div>{children}</div></div>;
 }
 
+function PublicMemberCard({token}) {
+  const [member,setMember]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState("");
+  useEffect(()=>{let alive=true;(async()=>{const {data,error}=await supabase.rpc("mc_get_public_member_card",{p_token:token});if(!alive)return;if(error)setError("Kartu member belum dapat dibuka.");else if(!data?.length)setError("QR tidak valid atau member tidak aktif.");else setMember(data[0]);setLoading(false);})();return()=>{alive=false;};},[token]);
+  return <main className="public-member-page"><div className="public-member-card"><Brand/><span className="eyebrow">DIGITAL MEMBERSHIP CARD</span>{loading?<p>Memuat kartu member…</p>:error?<p>{error}</p>:<><div className="public-member-monogram">S</div><h1>{member.full_name}</h1><strong>{member.member_code}</strong><div className="public-member-stats"><div><b>{member.total_stamps}</b><small>STAMP</small></div><div><b>{member.total_points}</b><small>POIN</small></div></div><p className="muted">Member aktif SANDIKALE MEMBER CLUB</p></>}<small className="public-member-footer">SANDIKALE • MEMBER CLUB</small></div></main>;
+}
+
 export default function App() {
+  const publicToken = new URLSearchParams(window.location.search).get("token");
+  if (publicToken) return <PublicMemberCard token={publicToken}/>;
   const [tab, setTab] = useState("home");
   const [stamps] = useState(6);
   const [modal, setModal] = useState(null);
