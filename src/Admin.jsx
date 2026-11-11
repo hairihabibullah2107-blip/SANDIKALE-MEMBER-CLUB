@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase.js";
 
-const NAV = ["Ringkasan", "Member", "Transaksi", "Aturan Stamp", "Reward", "Penukaran", "Laporan", "Pengaturan"];
+const NAV = ["Ringkasan", "Member", "QR Pendaftaran", "Transaksi", "Scan QR", "Aturan Stamp", "Reward", "Penukaran", "Laporan", "Pengaturan"];
 const money = value => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
 const dateText = value => value ? new Date(value).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
 function Icon({ name }) {
   const paths = {
-    grid:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    grid:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,\n    qr:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v2M14 20h2M20 19v2"/></>,
     users:<><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5"/></>,
     receipt:<><path d="M5 3h14v18l-3-2-4 2-4-2-3 2zM8 8h8M8 12h8M8 16h4"/></>,
     gift:<><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8H7.5a2.5 2.5 0 1 1 2.4-3.2L12 8Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 8Z"/></>,
@@ -43,7 +43,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   const [showClaimForm,setShowClaimForm]=useState(false);
   const [claimForm,setClaimForm]=useState({member_id:"",reward_id:""});
   const [reportMonth,setReportMonth]=useState(new Date().toISOString().slice(0,7));
-  const [qrMember,setQrMember]=useState(null);
+  const [qrMember,setQrMember]=useState(null);\n  const [scanToken,setScanToken]=useState("");\n  const [scanMember,setScanMember]=useState(null);\n  const [scanTotal,setScanTotal]=useState("85000");\n  const [scanResult,setScanResult]=useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true); setError("");
@@ -130,6 +130,27 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   function memberShareUrl(m){return window.location.origin+"/member?token="+encodeURIComponent(m.public_token);}
   async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. QR siap dibagikan.");}catch{notify("QR member siap ditampilkan.");}}
 
+
+  async function handleScannedValue(raw) {
+    let token=String(raw||"").trim();
+    try { const parsed=new URL(token); token=parsed.searchParams.get("token")||token; } catch {}
+    if(!token) { setError("QR tidak berisi token member yang valid."); return; }
+    setScanToken(token);setScanMember(null);setScanResult(null);setError("");
+    const {data,error:e}=await supabase.rpc("mc_get_public_member_card",{p_token:token});
+    if(e||!data?.length){setError(e?.message||"QR member tidak valid atau tidak aktif.");return;}
+    setScanMember(data[0]);setError("");
+  }
+  async function submitScannedTransaction(event) {
+    event.preventDefault();if(!scanToken||!scanMember)return;
+    setSaving(true);setError("");setScanResult(null);
+    const {data,error:e}=await supabase.rpc("mc_record_scan_transaction",{
+      p_token:scanToken,p_total:Number(scanTotal),p_invoice_number:null,p_notes:"Dicatat melalui Scan QR Member"
+    });
+    setSaving(false);
+    if(e){setError("Transaksi gagal dicatat: "+e.message);return;}
+    setScanResult(data);setScanMember(null);setScanToken("");await loadData();
+  }
+
   async function saveRules(event) {
     event.preventDefault(); setSaving(true); setError("");
     const value = { minimum_transaction:Number(minimum), stamps_per_transaction:Number(stampsPerTransaction) };
@@ -139,7 +160,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     notify("Aturan stamp tersimpan.");
   }
 
-  const navIcons = ["grid","users","receipt","chart","gift","receipt","chart","settings"];
+  const navIcons = ["grid","users","qr","receipt","qr","chart","gift","receipt","chart","settings"];
   return <div className="admin-shell">
     <aside className="admin-sidebar"><Brand/><div className="admin-workspace"><span className="admin-eyebrow">WORKSPACE</span><b>SANDIKALE Store</b><small>Member Club Management</small></div><span className="admin-eyebrow admin-menu-label">MENU UTAMA</span>{NAV.map((n,i)=><button key={n} className={active===n?"admin-nav active":"admin-nav"} onClick={()=>setActive(n)}><Icon name={navIcons[i]}/>{n}{active===n&&<i/>}</button>)}<div className="admin-sidebar-bottom"><span className="admin-live-dot"/> Terhubung ke database <small>SUPABASE • LIVE DATA</small></div></aside>
     <main className="admin-main">
@@ -156,6 +177,12 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
           {showAdd && <form className="admin-add-form" onSubmit={addMember}><label>Nama lengkap<input value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} placeholder="Nama pelanggan" required/></label><label>Nomor WhatsApp<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08xxxxxxxxxx" required/></label><label>Email (opsional)<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@contoh.com"/></label><button className="admin-primary" disabled={saving}>{saving?"Menyimpan…":"Simpan member"}</button></form>}
           <div className="admin-search"><Icon name="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari nama, ID, atau nomor WhatsApp…"/></div><MemberTable members={filtered} loading={loading} onShare={shareMember}/><p className="admin-footnote">Data dibaca langsung dari database Member Club. ID member dibuat otomatis saat pendaftaran.</p></section>}
         {active==="Transaksi" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">TRANSACTION RECORDS</span><h2>Riwayat transaksi ({transactions.length})</h2></div></div><TransactionTable transactions={transactions} memberById={memberById} loading={loading}/><p className="admin-footnote">Transaksi akan muncul setelah dicatat oleh sistem kasir atau staf yang memiliki akses.</p></section>}
+
+        {active==="QR Pendaftaran" && <section className="admin-panel admin-form-panel"><span className="admin-eyebrow">PUBLIC MEMBER REGISTRATION</span><h2>QR pendaftaran SANDIKALE</h2><p>QR ini berlaku untuk semua pelanggan. Cetak dan pasang di meja kasir atau area toko agar pelanggan dapat mendaftar sendiri.</p><div style={{maxWidth:320,margin:"24px auto",padding:24,border:"1px solid #e8e7e1",textAlign:"center",background:"#fff"}}><div style={{fontWeight:800,letterSpacing:2}}>SANDIKALE</div><div style={{fontSize:11,color:"#777",margin:"8px 0 16px"}}>SCAN • REGISTER • COLLECT STAMPS</div><img alt="QR pendaftaran member" style={{width:"100%",maxWidth:240}} src={"https://api.qrserver.com/v1/create-qr-code/?size=320x320&data="+encodeURIComponent(window.location.origin+"/?register=1")}/><b style={{display:"block",marginTop:12}}>DAFTAR MEMBER GRATIS</b></div><p className="admin-footnote" style={{textAlign:"center"}}>{window.location.origin+"/?register=1"}</p><div className="admin-report-actions"><button className="admin-primary" onClick={()=>window.print()}>Cetak QR Pendaftaran</button><button className="admin-small-button" onClick={()=>navigator.clipboard?.writeText(window.location.origin+"/?register=1").then(()=>notify("Link pendaftaran disalin."))}>Salin link pendaftaran</button></div></section>}
+        {active==="Scan QR" && <section className="admin-panel admin-form-panel"><span className="admin-eyebrow">CASHIER SCANNER</span><h2>Scan QR Member</h2><p>Scan QR kartu anggota pelanggan. Setelah identitas ditemukan, masukkan total transaksi untuk mencatat stamp otomatis.</p><ScannerCamera active={active==="Scan QR"&&!scanMember&&!scanResult} onDetected={handleScannedValue}/><label>Atau masukkan link / token QR<input value={scanToken} onChange={e=>setScanToken(e.target.value)} placeholder="Tempel link kartu member atau token QR"/></label><button className="admin-primary" type="button" disabled={!scanToken} onClick={()=>handleScannedValue(scanToken)}>Periksa member</button>
+          {scanMember&&<form onSubmit={submitScannedTransaction} style={{marginTop:22,padding:18,background:"#f6f5f1",display:"grid",gap:12}}><div><span className="admin-eyebrow">MEMBER TERVERIFIKASI</span><h3 style={{margin:"6px 0"}}>{scanMember.full_name}</h3><b>{scanMember.member_code}</b><p className="admin-footnote">Saldo saat ini: {scanMember.total_stamps} stamp • {scanMember.total_points} poin</p></div><label>Total transaksi (Rupiah)<input type="number" min="0" step="1000" required value={scanTotal} onChange={e=>setScanTotal(e.target.value)}/></label><button className="admin-primary" disabled={saving}>{saving?"Mencatat transaksi…":"Simpan transaksi & stamp"}</button></form>}
+          {scanResult&&<div className="admin-panel" style={{marginTop:18,borderColor:"#9aa88b"}}><span className="admin-eyebrow">TRANSAKSI BERHASIL</span><h3>{scanResult.full_name}</h3><p>Invoice: {scanResult.invoice_number}</p><p>Stamp ditambahkan: <b>+{scanResult.stamps_added}</b></p><p>Poin ditambahkan: <b>+{scanResult.points_added}</b></p><p>Total stamp sekarang: <b>{scanResult.new_total_stamps}</b></p><button className="admin-primary" onClick={()=>setScanResult(null)}>Scan member berikutnya</button></div>}
+        </section>}
         {active==="Aturan Stamp" && <section className="admin-panel admin-form-panel"><span className="admin-eyebrow">LOYALTY CONFIGURATION</span><h2>Aturan pemberian stamp</h2><form onSubmit={saveRules}><label>Minimum transaksi (Rupiah)<input type="number" min="0" value={minimum} onChange={e=>setMinimum(e.target.value)} required/></label><label>Stamp per transaksi<input type="number" min="1" max="100" value={stampsPerTransaction} onChange={e=>setStampsPerTransaction(e.target.value)} required/></label><button className="admin-primary" disabled={saving}>{saving?"Menyimpan…":"Simpan aturan"} <Icon name="arrow"/></button></form><p className="admin-footnote">Aturan disimpan ke tabel pengaturan. Penerapan otomatis pada transaksi kasir akan disambungkan pada tahap integrasi berikutnya.</p></section>}
         {active==="Reward" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">REWARD CATALOG</span><h2>Daftar reward ({rewards.length})</h2></div><button className="admin-primary" onClick={()=>setShowRewardForm(v=>!v)}><Icon name="plus"/>Tambah reward</button></div>
           {showRewardForm&&<form className="admin-add-form" onSubmit={saveReward}><label>Nama reward<input required value={rewardForm.name} onChange={e=>setRewardForm({...rewardForm,name:e.target.value})}/></label><label>Biaya poin<input type="number" min="0" required value={rewardForm.points_cost} onChange={e=>setRewardForm({...rewardForm,points_cost:e.target.value})}/></label><label>Stok (kosong = tanpa batas)<input type="number" min="0" value={rewardForm.stock} onChange={e=>setRewardForm({...rewardForm,stock:e.target.value})}/></label><label className="admin-wide-field">Deskripsi<input value={rewardForm.description} onChange={e=>setRewardForm({...rewardForm,description:e.target.value})}/></label><button className="admin-primary" disabled={saving}>{saving?"Menyimpan…":"Simpan reward"}</button></form>}
@@ -191,4 +218,32 @@ function TransactionTable({transactions,memberById,loading}) {
   if (loading) return <p className="admin-empty">Memuat transaksi…</p>;
   if (!transactions.length) return <p className="admin-empty">Belum ada transaksi. Data transaksi akan tampil setelah dicatat melalui sistem.</p>;
   return <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>INVOICE</th><th>MEMBER</th><th>NILAI</th><th>POIN</th><th>TANGGAL</th></tr></thead><tbody>{transactions.map(t=><tr key={t.id}><td><b>{t.invoice_number}</b></td><td>{memberById[t.member_id]?.full_name || "Non-member"}</td><td>{money(t.total)}</td><td>{t.points_earned}</td><td>{dateText(t.transaction_date)}</td></tr>)}</tbody></table></div>;
+}
+
+function ScannerCamera({active,onDetected}) {
+  const videoRef=useRef(null);
+  const [cameraError,setCameraError]=useState("");
+  useEffect(()=>{
+    if(!active)return;
+    let stream=null,frame=0,stopped=false,locked=false;
+    async function start(){
+      try{
+        if(!navigator.mediaDevices?.getUserMedia)throw new Error("Kamera memerlukan koneksi HTTPS dan izin browser.");
+        if(!("BarcodeDetector" in window))throw new Error("Pemindai otomatis belum didukung browser ini. Gunakan kolom input token di bawah.");
+        const detector=new window.BarcodeDetector({formats:["qr_code"]});
+        stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+        if(stopped){stream.getTracks().forEach(t=>t.stop());return;}
+        const video=videoRef.current;video.srcObject=stream;await video.play();
+        const scan=async()=>{
+          if(stopped||locked)return;
+          try{const codes=await detector.detect(video);if(codes.length&&codes[0].rawValue){locked=true;onDetected(codes[0].rawValue);return;}}catch{}
+          frame=requestAnimationFrame(scan);
+        };
+        scan();
+      }catch(e){setCameraError(e.message||"Kamera tidak dapat dibuka.");}
+    }
+    start();
+    return()=>{stopped=true;cancelAnimationFrame(frame);if(stream)stream.getTracks().forEach(t=>t.stop());};
+  },[active,onDetected]);
+  return <div style={{margin:"18px 0"}}><video ref={videoRef} muted playsInline style={{width:"100%",maxWidth:420,minHeight:180,background:"#171717",objectFit:"cover",borderRadius:4}}/><p className="admin-footnote">{cameraError||"Arahkan kamera belakang ke QR kartu member. Izinkan akses kamera jika diminta."}</p></div>;
 }
