@@ -72,97 +72,30 @@ function Modal({ title, children, onClose }) {
 }
 
 function PublicMemberCard({token}) {
-  const [dashboard,setDashboard]=useState(null);
-  const [loading,setLoading]=useState(true);
-  const [error,setError]=useState("");
-  const [notice,setNotice]=useState("");
-  const [claiming,setClaiming]=useState("");
-  const memberUrl=window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(token);
-  const loadDashboard=async()=>{
-    setLoading(true);setError("");
-    const {data,error:rpcError}=await supabase.rpc("mc_get_member_dashboard",{p_token:token});
-    if(rpcError){setError(rpcError.message||"Dashboard member belum dapat dimuat.");setDashboard(null);}
-    else setDashboard(data);
-    setLoading(false);
-  };
-  useEffect(()=>{loadDashboard();},[token]);
-  async function claim(reward){
-    if(!window.confirm("Ajukan penukaran "+reward.name+"? Permintaan akan menunggu verifikasi kasir SANDIKALE."))return;
-    setClaiming(reward.id);setNotice("");setError("");
-    const {error:claimError}=await supabase.rpc("mc_member_claim_reward",{p_token:token,p_reward_id:reward.id});
-    setClaiming("");
-    if(claimError){setError(claimError.message||"Permintaan reward gagal dikirim.");return;}
-    setNotice("Permintaan reward berhasil dikirim. Tunggu verifikasi dari SANDIKALE.");
-    await loadDashboard();
-  }
-  const fmtDate=value=>value?new Date(value).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}):"—";
-  const fmtMoney=value=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(value||0));
-  const statusLabel=value=>({pending:"Menunggu",approved:"Disetujui",fulfilled:"Selesai",cancelled:"Dibatalkan"}[value]||value);
-  const panel={background:"#fff",border:"1px solid #e7e6df",padding:20,marginTop:16};
-  const metric={background:"#292929",padding:18,flex:1,minWidth:110};
-  return <main className="public-member-page"><div style={{width:"100%",maxWidth:760,margin:"0 auto",padding:"24px 14px 48px",fontFamily:"'DM Sans',sans-serif"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><Brand/><span style={{fontSize:10,letterSpacing:2,color:"#777"}}>MEMBER DASHBOARD</span></div>
-    {loading?<section style={panel}><p>Memuat dashboard member…</p></section>:error&&!dashboard?<section style={panel}><h2>Dashboard belum dapat dibuka</h2><p>{error}</p><button onClick={loadDashboard}>Coba lagi</button></section>:dashboard&&<>
-      <section style={{...panel,background:"#191919",color:"#fff",padding:24,marginTop:24}}>
-        <span style={{fontSize:10,letterSpacing:2,color:"#aaa"}}>SANDIKALE DIGITAL MEMBER CARD</span>
-        <h1 style={{fontSize:28,margin:"12px 0 4px"}}>{dashboard.member.full_name}</h1>
-        <b style={{color:"#ddd"}}>{dashboard.member.member_code}</b>
-        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:22}}>
-          <div style={metric}><b style={{fontSize:30}}>{dashboard.member.total_stamps}</b><small style={{display:"block",color:"#bbb"}}>TOTAL STAMP</small></div>
-          <div style={metric}><b style={{fontSize:30}}>{dashboard.member.total_points}</b><small style={{display:"block",color:"#bbb"}}>TOTAL POIN</small></div>
-          <div style={metric}><b style={{fontSize:30}}>{dashboard.available_points}</b><small style={{display:"block",color:"#bbb"}}>POIN TERSEDIA</small></div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:18,marginTop:20,flexWrap:"wrap"}}>
-          <img alt="QR member SANDIKALE" style={{width:132,height:132,background:"#fff",padding:7}} src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(memberUrl)}/>
-          <div style={{fontSize:12,color:"#ccc",lineHeight:1.7,maxWidth:300}}>Tunjukkan QR ini kepada kasir setiap kali bertransaksi agar stamp dan poin kamu tercatat otomatis.<br/>Bergabung sejak {fmtDate(dashboard.member.joined_at)}.</div>
-        </div>
-      </section>
-      {error&&<p role="alert" style={{...panel,color:"#9b2525",marginTop:12}}>{error}</p>}
-      {notice&&<p role="status" style={{...panel,color:"#23633b",marginTop:12}}>{notice}</p>}
-      <section style={panel}><h2 style={{marginTop:0}}>Reward tersedia</h2><p style={{fontSize:13,color:"#777"}}>Gunakan poin tersedia untuk mengajukan penukaran. Kasir akan memproses permintaan kamu.</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:12}}>
-          {(dashboard.rewards||[]).map(reward=><article key={reward.id} style={{border:"1px solid #e8e7e1",padding:16,display:"flex",flexDirection:"column",gap:8}}>
-            <b>{reward.name}</b><span style={{fontSize:12,color:"#777"}}>{reward.description||"Reward khusus member SANDIKALE"}</span>
-            <strong>{reward.points_cost} poin</strong><small style={{color:"#777"}}>Stok: {reward.stock===null?"Tersedia":reward.stock}</small>
-            <button disabled={claiming===reward.id||dashboard.available_points<reward.points_cost||(reward.stock!==null&&reward.stock<1)} onClick={()=>claim(reward)} style={{marginTop:"auto",padding:12,background:"#191919",color:"#fff",border:0,opacity:(dashboard.available_points<reward.points_cost||(reward.stock!==null&&reward.stock<1))?0.45:1}}>
-              {claiming===reward.id?"Mengirim…":dashboard.available_points<reward.points_cost?"Poin belum cukup":reward.stock===0?"Stok habis":"Ajukan reward"}
-            </button>
-          </article>)}
-          {!dashboard.rewards?.length&&<p>Belum ada reward aktif.</p>}
-        </div>
-      </section>
-      <section style={panel}><h2 style={{marginTop:0}}>Riwayat transaksi</h2>{dashboard.transactions?.length?dashboard.transactions.map((item,index)=><div key={item.invoice_number||index} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"12px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.invoice_number}</b><div style={{color:"#777"}}>{fmtDate(item.transaction_date)}</div></div><div style={{textAlign:"right"}}><b>{fmtMoney(item.total)}</b><div style={{color:"#47724c"}}>+{item.points_earned} poin</div></div></div>):<p style={{color:"#777"}}>Belum ada transaksi tercatat.</p>}</section>
-      <section style={panel}><h2 style={{marginTop:0}}>Status penukaran reward</h2>{dashboard.claims?.length?dashboard.claims.map(item=><div key={item.id} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"10px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.reward_name}</b><div style={{color:"#777"}}>{fmtDate(item.claimed_at)} • {item.points_spent} poin</div></div><strong>{statusLabel(item.status)}</strong></div>):<p style={{color:"#777"}}>Belum ada permintaan penukaran.</p>}</section>
-      <section style={{...panel,background:"#f8f7f3",borderColor:"#dedbd1"}}>
-        <div style={{fontSize:10,letterSpacing:2,color:"#8b8579",fontWeight:700}}>WE ARE HERE TO HELP</div>
-        <h2 style={{margin:"8px 0 6px",fontSize:21,color:"#191919"}}>Hubungi & kunjungi SANDIKALE</h2>
-        <p style={{fontSize:13,color:"#777",lineHeight:1.6,marginTop:0}}>Butuh bantuan terkait poin, stamp, reward, atau pesanan? Hubungi admin atau kunjungi toko kami.</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(205px,1fr))",gap:10,marginTop:16}}>
-          <a href="https://www.google.com/maps/search/?api=1&query=Dusun+Penangke%2C+Desa+Sesaot%2C+Kecamatan+Narmada%2C+Kabupaten+Lombok+Barat%2C+NTB" target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#fff",border:"1px solid #e7e6df",color:"#191919",textDecoration:"none"}}>
-            <span style={{fontSize:10,letterSpacing:1.5,color:"#8b8579",fontWeight:700}}>LOKASI TOKO</span>
-            <strong style={{display:"block",fontSize:14,marginTop:8,lineHeight:1.5}}>Dusun Penangke, Desa Sesaot</strong>
-            <span style={{display:"block",fontSize:12,color:"#777",lineHeight:1.6,marginTop:4}}>Kec. Narmada, Kab. Lombok Barat, NTB</span>
-            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Lihat petunjuk lokasi ↗</span>
-          </a>
-          <a href="https://www.instagram.com/_sandikale/" target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#fff",border:"1px solid #e7e6df",color:"#191919",textDecoration:"none"}}>
-            <span style={{fontSize:10,letterSpacing:1.5,color:"#8b8579",fontWeight:700}}>INSTAGRAM</span>
-            <strong style={{display:"block",fontSize:14,marginTop:8}}>@_sandikale</strong>
-            <span style={{display:"block",fontSize:12,color:"#777",lineHeight:1.6,marginTop:4}}>Lihat karya, produk, dan informasi terbaru SANDIKALE.</span>
-            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Kunjungi Instagram ↗</span>
-          </a>
-          <a href="https://wa.me/6282266412844?text=Halo%20Admin%20SANDIKALE%2C%20saya%20member%20SANDIKALE%20ingin%20bertanya." target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#191919",border:"1px solid #191919",color:"#fff",textDecoration:"none"}}>
-            <span style={{fontSize:10,letterSpacing:1.5,color:"#c9c4b8",fontWeight:700}}>WHATSAPP ADMIN</span>
-            <strong style={{display:"block",fontSize:14,marginTop:8}}>+62 822-6641-2844</strong>
-            <span style={{display:"block",fontSize:12,color:"#d0cec8",lineHeight:1.6,marginTop:4}}>Tanyakan bantuan member dan layanan SANDIKALE langsung ke admin.</span>
-            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Chat admin sekarang ↗</span>
-          </a>
-        </div>
-      </section>
-      <p style={{textAlign:"center",fontSize:11,color:"#888",marginTop:24}}>SANDIKALE • MEMBER CLUB</p>
-    </>}
-  </div></main>;
+ const [dashboard,setDashboard]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState(""),[claiming,setClaiming]=useState(""),[tab,setTab]=useState("home"),[showQr,setShowQr]=useState(false);
+ const memberUrl=window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(token);
+ const loadDashboard=async()=>{setLoading(true);setError("");const {data,error:rpcError}=await supabase.rpc("mc_get_member_dashboard",{p_token:token});if(rpcError){setError(rpcError.message||"Dashboard member belum dapat dimuat.");setDashboard(null);}else setDashboard(data);setLoading(false);};
+ useEffect(()=>{loadDashboard();},[token]);
+ async function claim(r){if(!window.confirm("Ajukan penukaran "+r.name+"? Permintaan menunggu verifikasi kasir SANDIKALE."))return;setClaiming(r.id);setNotice("");setError("");const {error:e}=await supabase.rpc("mc_member_claim_reward",{p_token:token,p_reward_id:r.id});setClaiming("");if(e){setError(e.message||"Permintaan reward gagal.");return;}setNotice("Permintaan reward berhasil dikirim. Tunggu verifikasi SANDIKALE.");await loadDashboard();}
+ const date=v=>v?new Date(v).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"}):"—";
+ const money=v=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(v||0));
+ const m=dashboard?.member||{},stamps=Number(m.total_stamps||0),target=Math.max(1,Number(dashboard?.stamp_target||10)),pct=Math.min(100,Math.round(stamps/target*100));
+ const tabs=[["home","⌂","Beranda"],["rewards","◇","Reward"],["history","↺","Riwayat"],["profile","○","Profil"]];
+ const qr="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data="+encodeURIComponent(memberUrl);
+ return <main className="member-portal"><header className="member-topbar"><Brand/><span>AREA MEMBER　●</span></header>
+ {loading?<div className="member-loading">Menyiapkan ruang member…</div>:error&&!dashboard?<section className="member-error"><h2>Dashboard belum dapat dibuka</h2><p>{error}</p><button onClick={loadDashboard}>Coba lagi</button></section>:dashboard&&<>
+ <div className="member-layout"><aside className="member-sidebar"><small>MEMBER MENU</small><nav>{tabs.map(([id,ico,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{ico}　{label}</button>)}</nav></aside>
+ <section className="member-content"><div className="member-welcome-row"><div><small>{new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}).toUpperCase()}</small><h1>Halo, {m.full_name||"Member"}.</h1><p>Senang melihatmu kembali di SANDIKALE MEMBER CLUB.</p></div><span>● MEMBER AKTIF</span></div>
+ {error&&<p className="member-alert error">{error}</p>}{notice&&<p className="member-alert success">{notice}</p>}
+ {tab==="home"&&<><div className="member-home-grid"><section className="member-hero-card"><div className="member-hero-top"><Brand compact/><span>MEMBER</span></div><div><small>DIGITAL MEMBERSHIP CARD</small><h2>Belanja lebih dekat.<br/>Reward lebih berarti.</h2></div><div className="member-hero-bottom"><div><small>MEMBER NAME</small><b>{m.full_name}</b><small>{m.member_code}</small></div><button onClick={()=>setShowQr(true)}>▦<small>QR MEMBER</small></button></div></section><section className="member-thankyou"><small>A LITTLE THANK YOU</small><h2>Setiap karya,<br/>ada apresiasi.</h2><p>Kumpulkan stamp dari transaksi valid dan tukarkan dengan reward spesial dari SANDIKALE.</p><button onClick={()=>setTab("rewards")}>Jelajahi reward →</button><b>01</b></section></div>
+ <div className="member-lower-grid"><section className="member-panel"><div className="member-section-heading"><div><small>YOUR COLLECTION</small><h2>Koleksi stamp</h2></div><strong>{stamps}<small> / {target}</small></strong></div><p>Setiap transaksi valid membawa kamu lebih dekat ke reward berikutnya.</p><div className="member-stamp-grid">{Array.from({length:target},(_,i)=><div key={i} className={i<stamps?"earned":""}>{i<stamps?"S":String(i+1).padStart(2,"0")}</div>)}</div><div className="member-progress-meta"><span>Progress reward</span><b>{pct}%</b></div><div className="member-progress"><i style={{width:pct+"%"}}/></div><button className="member-next-reward" onClick={()=>setTab("rewards")}>{target-stamps} stamp lagi menuju reward　›</button></section><section className="member-panel member-meta-panel"><div><small>MEMBER SINCE</small><b>{date(m.joined_at)}</b></div><div><small>MEMBER ID</small><b>{m.member_code}</b></div><div><small>TOTAL POIN</small><b>{m.total_points||0} poin</b></div><div><small>POIN TERSEDIA</small><b>{dashboard.available_points||0} poin</b></div></section></div></>}
+ {tab==="rewards"&&<section className="member-section-view"><small>EXCLUSIVE FOR MEMBERS</small><h2>Reward pilihan</h2><div className="member-reward-grid">{(dashboard.rewards||[]).map(r=><article className="member-reward-card" key={r.id}><small>SANDIKALE PRIVILEGE</small><h3>{r.name}</h3><p>{r.description||"Reward khusus member SANDIKALE."}</p><b>{r.points_cost} POIN</b><small>Stok: {r.stock===null?"Tersedia":r.stock}</small><button disabled={claiming===r.id||dashboard.available_points<r.points_cost||(r.stock!==null&&r.stock<1)} onClick={()=>claim(r)}>{claiming===r.id?"Mengirim…":dashboard.available_points<r.points_cost?"Poin belum cukup":"Ajukan reward"}</button></article>)}</div></section>}
+ {tab==="history"&&<section className="member-section-view"><small>YOUR ACTIVITY</small><h2>Riwayat aktivitas</h2><section className="member-panel"><h3>Riwayat transaksi</h3>{dashboard.transactions?.length?dashboard.transactions.map((x,i)=><div className="member-history-row" key={x.invoice_number||i}><span><b>{x.invoice_number}</b><small>{date(x.transaction_date)}</small></span><span><b>{money(x.total)}</b><small>+{x.points_earned} poin</small></span></div>):<p>Belum ada transaksi tercatat.</p>}</section><section className="member-panel"><h3>Status penukaran reward</h3>{dashboard.claims?.length?dashboard.claims.map(x=><div className="member-history-row" key={x.id}><span><b>{x.reward_name}</b><small>{date(x.claimed_at)} • {x.points_spent} poin</small></span><b>{({pending:"Menunggu",approved:"Disetujui",fulfilled:"Selesai",cancelled:"Dibatalkan"})[x.status]||x.status}</b></div>):<p>Belum ada permintaan penukaran.</p>}</section></section>}
+ {tab==="profile"&&<section className="member-section-view"><small>MEMBER IDENTITY</small><h2>Profil member</h2><section className="member-panel"><h3>{m.full_name}</h3><p>{m.member_code}</p><p>Member sejak {date(m.joined_at)}</p><p>Dusun Penangke, Desa Sesaot, Kec. Narmada, Kab. Lombok Barat, NTB</p><p><a href="https://www.instagram.com/_sandikale/" target="_blank" rel="noreferrer">@_sandikale</a></p><p><a href="https://wa.me/6282266412844" target="_blank" rel="noreferrer">WhatsApp +62 822-6641-2844</a></p></section></section>}
+ <footer className="member-footer">SANDIKALE MEMBER CLUB　•　CRAFTED WITH APPRECIATION</footer></section></div><nav className="member-mobile-nav">{tabs.map(([id,ico,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{ico}<small>{label}</small></button>)}</nav>
+ {showQr&&<div className="member-qr-overlay" onClick={()=>setShowQr(false)}><section className="member-qr-modal" onClick={e=>e.stopPropagation()}><button onClick={()=>setShowQr(false)}>×</button><h2>{m.full_name}</h2><b>{m.member_code}</b><img src={qr} alt="QR member SANDIKALE"/><p>Tunjukkan QR ini kepada kasir setiap kali bertransaksi.</p></section></div>}
+ </>}</main>;
 }
-
 
 function RegistrationPage() {
   const [form,setForm]=useState({full_name:"",phone:"",email:""});
