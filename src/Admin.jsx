@@ -173,7 +173,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   function memberShareUrl(m){return window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(m.public_token);}
   async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. Siap dibagikan ke customer.");}catch{notify("QR member siap ditampilkan.");}}
   async function copyMemberLink(m){try{await navigator.clipboard.writeText(memberShareUrl(m));notify("Link dashboard member berhasil disalin.");}catch{setError("Browser tidak mengizinkan salin otomatis. Buka link QR lalu salin manual.");}}
-  function shareMemberWhatsApp(m){const phone=String(m.phone||"").replace(/\\D/g,"").replace(/^0/,"62");const message="Halo "+m.full_name+", ini kartu digital SANDIKALE Member Club kamu. Buka dashboard dan tunjukkan QR ini setiap bertransaksi: "+memberShareUrl(m);window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(message),"_blank","noopener,noreferrer");}
+  function shareMemberWhatsApp(m){const phone=String(m.phone||"").replace(/\D/g,"").replace(/^0/,"62");const message="Halo "+m.full_name+", ini kartu digital SANDIKALE Member Club kamu. Buka dashboard dan tunjukkan QR ini setiap bertransaksi: "+memberShareUrl(m);window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(message),"_blank","noopener,noreferrer");}
   function togglePrintMember(id){setSelectedMemberIds(current=>current.includes(id)?current.filter(x=>x!==id):[...current,id]);}
   async function deleteMember(m){
     if(!window.confirm("Hapus member "+m.full_name+" ("+m.member_code+")? Data transaksi dan riwayat reward akan tetap disimpan, tetapi identitas pribadi dan QR lama akan dinonaktifkan."))return;
