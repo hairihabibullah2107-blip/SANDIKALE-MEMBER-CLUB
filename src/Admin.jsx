@@ -24,7 +24,7 @@ function Icon({ name }) {
 function Brand(){return <div className="brand"><span className="brand-mark">S</span><span><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>}
 
 export default function Admin({ ownerProfile, onOwnerSignOut }) {
-  const [active,setActive] = useState("Ringkasan");
+  const [active,setActive] = useState(ownerProfile?.role === "cashier" ? "Scan QR" : "Ringkasan");
   const [query,setQuery] = useState("");
   const [notice,setNotice] = useState("");
   const [error,setError] = useState("");
@@ -49,6 +49,12 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   const [scanMember,setScanMember]=useState(null);
   const [scanTotal,setScanTotal]=useState("85000");
   const [scanResult,setScanResult]=useState(null);
+  const [staff,setStaff]=useState([]);
+  const [staffLoading,setStaffLoading]=useState(false);
+  const [staffForm,setStaffForm]=useState({full_name:"",email:"",role:"cashier",password:""});
+  const [staffSaving,setStaffSaving]=useState(false);
+  const isOwner = ownerProfile?.role === "owner";
+  const visibleNav = ownerProfile?.role === "cashier" ? ["Scan QR","Penukaran"] : NAV;
 
   const loadData = useCallback(async () => {
     setLoading(true); setError("");
@@ -84,7 +90,35 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     setLoading(false);
   }, []);
 
+  const loadStaff = useCallback(async () => {
+    if (!isOwner) return;
+    setStaffLoading(true);
+    const { data, error: staffError } = await supabase.from("mc_staff_profiles").select("id,full_name,email,role,is_active,created_at").order("created_at",{ascending:false});
+    if (staffError) setError("Daftar staf belum dapat dimuat: " + staffError.message);
+    else setStaff(data || []);
+    setStaffLoading(false);
+  }, [isOwner]);
+
   useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { if (active === "Pengaturan" && isOwner) loadStaff(); }, [active,isOwner,loadStaff]);
+
+  async function createStaff(event) {
+    event.preventDefault(); setStaffSaving(true); setError("");
+    const { data, error: invokeError } = await supabase.functions.invoke("mc-manage-staff", { body: { action:"create", ...staffForm } });
+    setStaffSaving(false);
+    if (invokeError || data?.error) { setError("Akun staf gagal dibuat: " + (data?.error || invokeError?.message || "Kesalahan tidak diketahui.")); return; }
+    setStaffForm({full_name:"",email:"",role:"cashier",password:""});
+    notify("Akun staf berhasil dibuat. Bagikan password sementara secara pribadi.");
+    await loadStaff();
+  }
+
+  async function setStaffActive(person, isActive) {
+    setError("");
+    const { data, error: invokeError } = await supabase.functions.invoke("mc-manage-staff", { body: { action:"set_active", staff_id:person.id, is_active:isActive } });
+    if (invokeError || data?.error) { setError("Status staf gagal diperbarui: " + (data?.error || invokeError?.message || "Kesalahan tidak diketahui.")); return; }
+    notify(isActive ? "Akun staf diaktifkan." : "Akun staf dinonaktifkan.");
+    await loadStaff();
+  }
   const filtered = useMemo(() => members.filter(m => (m.full_name+" "+m.member_code+" "+m.phone).toLowerCase().includes(query.toLowerCase())),[members,query]);
   const memberById = useMemo(() => Object.fromEntries(members.map(m => [m.id,m])),[members]);
   const notify = message => { setNotice(message); window.setTimeout(() => setNotice(""),2800); };
@@ -167,9 +201,9 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
 
   const navIcons = ["grid","users","qr","receipt","qr","chart","gift","receipt","chart","settings"];
   return <div className="admin-shell">
-    <aside className="admin-sidebar"><Brand/><div className="admin-workspace"><span className="admin-eyebrow">WORKSPACE</span><b>SANDIKALE Store</b><small>Member Club Management</small></div><span className="admin-eyebrow admin-menu-label">MENU UTAMA</span>{NAV.map((n,i)=><button key={n} className={active===n?"admin-nav active":"admin-nav"} onClick={()=>setActive(n)}><Icon name={navIcons[i]}/>{n}{active===n&&<i/>}</button>)}<div className="admin-sidebar-bottom"><span className="admin-live-dot"/> Terhubung ke database <small>SUPABASE • LIVE DATA</small></div></aside>
+    <aside className="admin-sidebar"><Brand/><div className="admin-workspace"><span className="admin-eyebrow">WORKSPACE</span><b>SANDIKALE Store</b><small>Member Club Management</small></div><span className="admin-eyebrow admin-menu-label">MENU UTAMA</span>{visibleNav.map(n=><button key={n} className={active===n?"admin-nav active":"admin-nav"} onClick={()=>setActive(n)}><Icon name={navIcons[NAV.indexOf(n)]}/>{n}{active===n&&<i/>}</button>)}<div className="admin-sidebar-bottom"><span className="admin-live-dot"/> Terhubung ke database <small>SUPABASE • LIVE DATA</small></div></aside>
     <main className="admin-main">
-      <header className="admin-topbar"><div><span className="admin-eyebrow">SANDIKALE / ADMIN</span><b>{active}</b></div><div className="admin-user"><span className="admin-avatar">{(ownerProfile?.full_name || "Owner").slice(0,2).toUpperCase()}</span><span><b>{ownerProfile?.full_name || "Owner"}</b><small>{ownerProfile?.role === "owner" ? "Owner" : "Administrator"}</small></span><button className="admin-logout" onClick={onOwnerSignOut} title="Keluar"><Icon name="logout"/></button></div></header>
+      <header className="admin-topbar"><div><span className="admin-eyebrow">SANDIKALE / ADMIN</span><b>{active}</b></div><div className="admin-user"><span className="admin-avatar">{(ownerProfile?.full_name || "Owner").slice(0,2).toUpperCase()}</span><span><b>{ownerProfile?.full_name || "Owner"}</b><small>{ownerProfile?.role === "cashier" ? "Kasir" : ownerProfile?.role === "owner" ? "Owner" : "Administrator"}</small></span><button className="admin-logout" onClick={onOwnerSignOut} title="Keluar"><Icon name="logout"/></button></div></header>
       <div className="admin-content">
         <div className="admin-title-row"><div><span className="admin-eyebrow">SANDIKALE MEMBER CLUB</span><h1>{active==="Ringkasan"?"Ringkasan dashboard":active}</h1><p>Kelola program loyalti dan hubungan pelanggan SANDIKALE.</p></div><span className="admin-demo-pill admin-live-pill">DATA DATABASE</span></div>
         {error && <div className="admin-error" role="alert">{error}</div>}
@@ -198,7 +232,20 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
           {!claims.length&&!loading?<p className="admin-empty">Belum ada permintaan penukaran.</p>:<div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>MEMBER</th><th>REWARD</th><th>POIN</th><th>TANGGAL</th><th>STATUS / AKSI</th></tr></thead><tbody>{claims.map(cl=><tr key={cl.id}><td><b>{cl.mc_members?.full_name||"Member"}</b><small>{cl.mc_members?.member_code||"—"}</small></td><td>{cl.mc_rewards?.name||"Reward"}</td><td>{cl.points_spent}</td><td>{dateText(cl.claimed_at)}</td><td><span className={cl.status==="fulfilled"?"admin-status":cl.status==="cancelled"?"admin-pending":"admin-review"}>{cl.status==="pending"?"Menunggu":cl.status==="approved"?"Disetujui":cl.status==="fulfilled"?"Selesai":"Dibatalkan"}</span><div className="admin-action-row">{cl.status==="pending"&&<button className="admin-small-button" disabled={saving} onClick={()=>processClaim(cl,"approved")}>Setujui</button>}{["pending","approved"].includes(cl.status)&&<button className="admin-small-button" disabled={saving} onClick={()=>processClaim(cl,"fulfilled")}>Serahkan</button>}{["pending","approved"].includes(cl.status)&&<button className="admin-small-button danger" disabled={saving} onClick={()=>processClaim(cl,"cancelled")}>Batalkan</button>}</div></td></tr>)}</tbody></table></div>}
         </section>}
         {active==="Laporan" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">BUSINESS REPORT</span><h2>Laporan aktivitas</h2></div><label className="admin-month-filter">Periode<input type="month" value={reportMonth} onChange={e=>setReportMonth(e.target.value)}/></label></div><ReportSummary transactions={transactions} members={members} claims={claims} month={reportMonth}/><div className="admin-report-actions"><button className="admin-primary" onClick={()=>window.print()}>Cetak / Simpan PDF</button><button className="admin-small-button" onClick={()=>{const rows=[["Invoice","Tanggal","Member","Total","Poin"],...transactions.filter(t=>(t.transaction_date||"").slice(0,7)===reportMonth).map(t=>[t.invoice_number,t.transaction_date,memberById[t.member_id]?.full_name||"Non-member",t.total,t.points_earned])];const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8;"}));a.download="laporan-sandikale-"+reportMonth+".csv";a.click();URL.revokeObjectURL(a.href);}}>Unduh CSV transaksi</button></div></section>}
-        {active==="Pengaturan" && <section className="admin-panel admin-placeholder"><span className="admin-eyebrow">WORKSPACE SETTINGS</span><h2>Pengaturan Member Club</h2><p>Pengaturan dasar loyalti saat ini berada pada menu Aturan Stamp. Pengaturan staf dan hak akses akan diaktifkan pada tahap berikutnya.</p><button className="admin-primary" onClick={()=>setActive("Aturan Stamp")}>Buka Aturan Stamp <Icon name="arrow"/></button></section>}
+        {active==="Pengaturan" && isOwner && <section className="admin-panel admin-table-panel">
+          <div className="admin-panel-head"><div><span className="admin-eyebrow">STAFF MANAGEMENT</span><h2>Kelola akun staf</h2><p>Buat akun Admin atau Kasir. Hanya Owner yang dapat mengelola akun staf.</p></div></div>
+          <form className="admin-add-form" onSubmit={createStaff}>
+            <label>Nama lengkap staf<input value={staffForm.full_name} onChange={e=>setStaffForm({...staffForm,full_name:e.target.value})} minLength={2} maxLength={100} required placeholder="Nama staf"/></label>
+            <label>Email login<input type="email" value={staffForm.email} onChange={e=>setStaffForm({...staffForm,email:e.target.value})} required placeholder="staf@email.com"/></label>
+            <label>Peran<select value={staffForm.role} onChange={e=>setStaffForm({...staffForm,role:e.target.value})}><option value="cashier">Kasir</option><option value="admin">Admin</option></select></label>
+            <label>Password sementara<input type="password" autoComplete="new-password" value={staffForm.password} onChange={e=>setStaffForm({...staffForm,password:e.target.value})} minLength={10} maxLength={128} required placeholder="Minimal 10 karakter"/></label>
+            <button className="admin-primary" disabled={staffSaving}>{staffSaving?"Membuat akun…":"Buat akun staf"}</button>
+          </form>
+          <div className="admin-panel-head" style={{marginTop:28}}><div><span className="admin-eyebrow">REGISTERED STAFF</span><h2>Daftar staf ({staff.length})</h2></div><button className="admin-small-button" onClick={loadStaff}>Muat ulang</button></div>
+          {staffLoading ? <p className="admin-empty">Memuat daftar staf…</p> : !staff.length ? <p className="admin-empty">Belum ada akun staf tambahan.</p> : <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>NAMA STAF</th><th>EMAIL</th><th>PERAN</th><th>STATUS</th><th>AKSI</th></tr></thead><tbody>{staff.map(person=><tr key={person.id}><td><b>{person.full_name}</b></td><td>{person.email||"—"}</td><td>{person.role==="cashier"?"Kasir":person.role==="admin"?"Admin":"Owner"}</td><td><span className={person.is_active?"admin-status":"admin-pending"}>{person.is_active?"Aktif":"Nonaktif"}</span></td><td>{person.role==="owner"?<span className="admin-footnote">Akun utama</span>:<button className="admin-small-button" onClick={()=>setStaffActive(person,!person.is_active)}>{person.is_active?"Nonaktifkan":"Aktifkan"}</button>}</td></tr>)}</tbody></table></div>}
+          <p className="admin-footnote">Password sementara tidak ditampilkan kembali setelah akun dibuat. Bagikan secara pribadi dan minta staf menggantinya setelah login pertama.</p>
+        </section>}
+        {active==="Pengaturan" && !isOwner && <section className="admin-panel admin-placeholder"><span className="admin-eyebrow">WORKSPACE SETTINGS</span><h2>Pengaturan Member Club</h2><p>Pengaturan staf hanya tersedia untuk Owner.</p><button className="admin-primary" onClick={()=>setActive("Aturan Stamp")}>Buka Aturan Stamp <Icon name="arrow"/></button></section>}
       </div>
       <footer className="admin-footer"><Brand/><span>© 2026 SANDIKALE MEMBER CLUB</span><span>OWNER WORKSPACE • LIVE DATABASE</span></footer>
     </main>
