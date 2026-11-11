@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase.js";
 
-const NAV = ["Ringkasan", "Member", "QR Pendaftaran", "Transaksi", "Scan QR", "Aturan Stamp", "Reward", "Penukaran", "Laporan", "Pengaturan"];
+const NAV = ["Ringkasan", "Member", "Kartu Member", "QR Pendaftaran", "Transaksi", "Scan QR", "Aturan Stamp", "Reward", "Penukaran", "Laporan", "Pengaturan"];
 const money = value => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
 const dateText = value => value ? new Date(value).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 
@@ -45,6 +45,8 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   const [claimForm,setClaimForm]=useState({member_id:"",reward_id:""});
   const [reportMonth,setReportMonth]=useState(new Date().toISOString().slice(0,7));
   const [qrMember,setQrMember]=useState(null);
+  const [selectedMemberIds,setSelectedMemberIds]=useState([]);
+  const [printFormat,setPrintFormat]=useState("card");
   const [scanToken,setScanToken]=useState("");
   const [scanMember,setScanMember]=useState(null);
   const [scanTotal,setScanTotal]=useState("85000");
@@ -120,6 +122,8 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     await loadStaff();
   }
   const filtered = useMemo(() => members.filter(m => (m.full_name+" "+m.member_code+" "+m.phone).toLowerCase().includes(query.toLowerCase())),[members,query]);
+  const activeMembers = useMemo(() => members.filter(m => m.status === "active"),[members]);
+  const selectedPrintMembers = useMemo(() => activeMembers.filter(m => selectedMemberIds.includes(m.id)),[activeMembers,selectedMemberIds]);
   const memberById = useMemo(() => Object.fromEntries(members.map(m => [m.id,m])),[members]);
   const notify = message => { setNotice(message); window.setTimeout(() => setNotice(""),2800); };
 
@@ -167,7 +171,10 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     notify(status==="fulfilled"?"Reward diserahkan; poin dipotong.":status==="approved"?"Penukaran disetujui.":"Penukaran dibatalkan.");await loadData();
   }
   function memberShareUrl(m){return window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(m.public_token);}
-  async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. QR siap dibagikan.");}catch{notify("QR member siap ditampilkan.");}}
+  async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. Siap dibagikan ke customer.");}catch{notify("QR member siap ditampilkan.");}}
+  async function copyMemberLink(m){try{await navigator.clipboard.writeText(memberShareUrl(m));notify("Link dashboard member berhasil disalin.");}catch{setError("Browser tidak mengizinkan salin otomatis. Buka link QR lalu salin manual.");}}
+  function shareMemberWhatsApp(m){const phone=String(m.phone||"").replace(/\\D/g,"").replace(/^0/,"62");const message="Halo "+m.full_name+", ini kartu digital SANDIKALE Member Club kamu. Buka dashboard dan tunjukkan QR ini setiap bertransaksi: "+memberShareUrl(m);window.open("https://wa.me/"+phone+"?text="+encodeURIComponent(message),"_blank","noopener,noreferrer");}
+  function togglePrintMember(id){setSelectedMemberIds(current=>current.includes(id)?current.filter(x=>x!==id):[...current,id]);}
   async function deleteMember(m){
     if(!window.confirm("Hapus member "+m.full_name+" ("+m.member_code+")? Data transaksi dan riwayat reward akan tetap disimpan, tetapi identitas pribadi dan QR lama akan dinonaktifkan."))return;
     setSaving(true);setError("");
@@ -208,7 +215,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     notify("Aturan stamp tersimpan.");
   }
 
-  const navIcons = ["grid","users","qr","receipt","qr","chart","gift","receipt","chart","settings"];
+  const navIcons = ["grid","users","qr","qr","receipt","qr","chart","gift","receipt","chart","settings"];
   return <div className="admin-shell">
     <aside className="admin-sidebar"><Brand/><div className="admin-workspace"><span className="admin-eyebrow">WORKSPACE</span><b>SANDIKALE Store</b><small>Member Club Management</small></div><span className="admin-eyebrow admin-menu-label">MENU UTAMA</span>{visibleNav.map(n=><button key={n} className={active===n?"admin-nav active":"admin-nav"} onClick={()=>setActive(n)}><Icon name={navIcons[NAV.indexOf(n)]}/>{n}{active===n&&<i/>}</button>)}<div className="admin-sidebar-bottom"><span className="admin-live-dot"/> Terhubung ke database <small>SUPABASE • LIVE DATA</small></div></aside>
     <main className="admin-main">
@@ -224,6 +231,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
         {active==="Member" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">CUSTOMER DATABASE</span><h2>Daftar member ({members.length})</h2></div><button className="admin-primary" onClick={()=>setShowAdd(v=>!v)}><Icon name="plus"/>{showAdd?"Tutup form":"Tambah member"}</button></div>
           {showAdd && <form className="admin-add-form" onSubmit={addMember}><label>Nama lengkap<input value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} placeholder="Nama pelanggan" required/></label><label>Nomor WhatsApp<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08xxxxxxxxxx" required/></label><label>Email (opsional)<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@contoh.com"/></label><button className="admin-primary" disabled={saving}>{saving?"Menyimpan…":"Simpan member"}</button></form>}
           <div className="admin-search"><Icon name="search"/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Cari nama, ID, atau nomor WhatsApp…"/></div><MemberTable members={filtered} loading={loading} onShare={shareMember} onDelete={deleteMember}/><p className="admin-footnote">Data dibaca langsung dari database Member Club. ID member dibuat otomatis saat pendaftaran.</p></section>}
+        {active==="Kartu Member" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">MEMBER CARD STUDIO</span><h2>Kartu digital & kartu cetak</h2><p className="admin-footnote">Pilih member aktif, lalu bagikan link dashboard melalui WhatsApp atau cetak kartu QR untuk dompet dan keychain.</p></div></div><div className="member-card-toolbar"><button className="admin-small-button" onClick={()=>setSelectedMemberIds(activeMembers.map(m=>m.id))}>Pilih semua ({activeMembers.length})</button><button className="admin-small-button" onClick={()=>setSelectedMemberIds([])}>Kosongkan pilihan</button><span className="member-selected-count">{selectedPrintMembers.length} member dipilih</span></div><div className="member-print-options"><label>Format cetak<select value={printFormat} onChange={e=>setPrintFormat(e.target.value)}><option value="card">Kartu member 85,6 × 54 mm</option><option value="keychain">Tag keychain 52 × 82 mm</option></select></label><button className="admin-primary" disabled={!selectedPrintMembers.length} onClick={()=>window.print()}>Cetak {selectedPrintMembers.length} QR member</button></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>PILIH</th><th>NAMA MEMBER</th><th>KODE</th><th>STAMP</th><th>AKSI BAGIKAN</th></tr></thead><tbody>{activeMembers.map(m=><tr key={m.id}><td><input aria-label={"Pilih "+m.full_name} type="checkbox" checked={selectedMemberIds.includes(m.id)} onChange={()=>togglePrintMember(m.id)}/></td><td><b>{m.full_name}</b><small>{m.phone}</small></td><td>{m.member_code}</td><td>{m.total_stamps||0}</td><td><div className="admin-action-row"><button className="admin-small-button" onClick={()=>shareMember(m)}>QR / Link</button><button className="admin-small-button" onClick={()=>shareMemberWhatsApp(m)}>WhatsApp</button></div></td></tr>)}</tbody></table></div><p className="admin-footnote">File cetak dibuat langsung dari browser. Pilih “Simpan sebagai PDF” pada dialog printer untuk menyimpan file PDF, atau pilih printer untuk mencetak. Pastikan skala cetak 100% / Actual size.</p></section>}
         {active==="Transaksi" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">TRANSACTION RECORDS</span><h2>Riwayat transaksi ({transactions.length})</h2></div></div><TransactionTable transactions={transactions} memberById={memberById} loading={loading}/><p className="admin-footnote">Transaksi akan muncul setelah dicatat oleh sistem kasir atau staf yang memiliki akses.</p></section>}
 
         {active==="QR Pendaftaran" && <section className="admin-panel admin-form-panel"><span className="admin-eyebrow">PUBLIC MEMBER REGISTRATION</span><h2>QR pendaftaran SANDIKALE</h2><p>QR ini berlaku untuk semua pelanggan. Cetak dan pasang di meja kasir atau area toko agar pelanggan dapat mendaftar sendiri.</p><div style={{maxWidth:320,margin:"24px auto",padding:24,border:"1px solid #e8e7e1",textAlign:"center",background:"#fff"}}><div style={{fontWeight:800,letterSpacing:2}}>SANDIKALE</div><div style={{fontSize:11,color:"#777",margin:"8px 0 16px"}}>SCAN • REGISTER • COLLECT STAMPS</div><img alt="QR pendaftaran member" style={{width:"100%",maxWidth:240}} src={"https://api.qrserver.com/v1/create-qr-code/?size=320x320&data="+encodeURIComponent(window.location.origin+import.meta.env.BASE_URL+"?register=1")}/><b style={{display:"block",marginTop:12}}>DAFTAR MEMBER GRATIS</b></div><p className="admin-footnote" style={{textAlign:"center"}}>{window.location.origin+import.meta.env.BASE_URL+"?register=1"}</p><div className="admin-report-actions"><button className="admin-primary" onClick={()=>window.print()}>Cetak QR Pendaftaran</button><button className="admin-small-button" onClick={()=>navigator.clipboard?.writeText(window.location.origin+import.meta.env.BASE_URL+"?register=1").then(()=>notify("Link pendaftaran disalin."))}>Salin link pendaftaran</button></div></section>}
@@ -258,7 +266,8 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
       </div>
       <footer className="admin-footer"><Brand/><span>© 2026 SANDIKALE MEMBER CLUB</span><span>{ownerProfile?.role === "cashier" ? "CASHIER WORKSPACE" : "OWNER WORKSPACE"} • LIVE DATABASE</span></footer>
     </main>
-    {qrMember&&<div className="admin-modal-backdrop" onClick={()=>setQrMember(null)}><div className="admin-qr-modal" onClick={e=>e.stopPropagation()}><button className="admin-modal-close" onClick={()=>setQrMember(null)}>×</button><span className="admin-eyebrow">SHARE MEMBER QR</span><h2>{qrMember.full_name}</h2><img alt="QR member" src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(memberShareUrl(qrMember))}/><p>{qrMember.member_code}</p><button className="admin-primary" onClick={()=>shareMember(qrMember)}>Salin link member</button></div></div>}
+    {qrMember&&<div className="admin-modal-backdrop" onClick={()=>setQrMember(null)}><div className="admin-qr-modal" onClick={e=>e.stopPropagation()}><button className="admin-modal-close" onClick={()=>setQrMember(null)}>×</button><span className="admin-eyebrow">PERSONAL MEMBER QR</span><h2>{qrMember.full_name}</h2><img alt="QR member" src={"https://api.qrserver.com/v1/create-qr-code/?size=260x260&data="+encodeURIComponent(memberShareUrl(qrMember))}/><p>{qrMember.member_code}</p><div className="admin-qr-link">{memberShareUrl(qrMember)}</div><button className="admin-primary" onClick={()=>copyMemberLink(qrMember)}>Salin link dashboard</button><button className="admin-small-button" onClick={()=>shareMemberWhatsApp(qrMember)}>Bagikan melalui WhatsApp</button><p className="admin-footnote">QR ini bersifat pribadi. Customer dapat menyimpannya atau mencetaknya sebagai keychain.</p></div></div>}
+    <div className={"member-print-sheet "+(printFormat==="keychain"?"is-keychain":"is-card")}>{selectedPrintMembers.map(m=><article className="member-print-card" key={m.id}><div className="member-print-brand"><span className="member-print-mark">S</span><span><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div><div className="member-print-body"><div className="member-print-identity"><span className="member-print-kicker">LOYALTY MEMBER</span><b>{m.full_name}</b><small>{m.member_code}</small><span className="member-print-note">SCAN TO OPEN YOUR MEMBER DASHBOARD</span></div><img alt={"QR member "+m.member_code} src={"https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=1&data="+encodeURIComponent(memberShareUrl(m))}/></div><div className="member-print-footer"><span>SHOW THIS QR AT EVERY VISIT</span><span> SANDIKALE • LOMBOK</span></div></article>)}</div>
     {notice&&<div className="admin-toast">{notice}</div>}
   </div>;
 }
