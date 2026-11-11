@@ -139,3 +139,130 @@ body{background:#f4f3ef;color:var(--ink)}
   .member-print-sheet.is-card .member-print-card:nth-child(8n){break-after:page!important;page-break-after:always!important}
   .member-print-sheet.is-keychain .member-print-card:nth-child(9n){break-after:page!important;page-break-after:always!important}
 }
+
+
+/* SANDIKALE MEMBER CLUB — Minimalist Luxury identity */
+:root{
+  --ink:#11110f;--muted:#85847e;--line:#dedbd4;--paper:#fbfaf7;
+  --accent:#bd2028;--luxury-red:#bd2028;--luxury-black:#10100f;--luxury-ivory:#f4f1e9;
+}
+body{background:#f4f2ed;color:var(--luxury-black)}
+.brand{gap:11px;color:#111}
+.brand-mark{width:36px;height:36px;border:0!important;background:transparent!important;color:var(--luxury-red)!important;display:grid;place-items:center;flex:none;padding:2px}
+.brand-emblem{display:block;width:100%;height:100%;overflow:visible}
+.brand-wordmark b{font-family:Manrope,sans-serif;font-weight:800;letter-spacing:2px;font-size:13px}
+.brand-wordmark small{font-size:7px;letter-spacing:3.2px;color:#8d8980;margin-top:4px}
+.brand-compact .brand-mark{width:29px;height:29px;color:var(--luxury-red)!important}
+.brand-compact .brand-wordmark b{font-size:10px;letter-spacing:1.8px}
+.brand-compact .brand-wordmark small{font-size:6px;letter-spacing:2.5px}
+.topbar{background:#fbfaf7;border-bottom-color:#dedbd4}
+.sidebar{background:#f8f7f3;border-right-color:#dedbd4}
+.sidebar-label,.eyebrow,.admin-eyebrow{letter-spacing:2px}
+.nav-link{border-radius:2px;letter-spacing:.2px}
+.nav-link.active{background:#eae7df;color:#111}
+.nav-link.active:before{background:var(--luxury-red);width:2px}
+.member-card{border-radius:2px;background:linear-gradient(135deg,#0c0c0b 0%,#1b1b19 68%,#292724 100%);box-shadow:0 18px 44px #00000018;border:1px solid #34322e}
+.member-chip{border-color:#bd202877;color:#f2e9e3;letter-spacing:2.4px}
+.card-watermark{color:#bd20280d}
+.card-middle h2{font-weight:500;letter-spacing:-.5px}
+.member-card .brand-compact .brand-mark{color:#bd2028!important}
+.member-card .brand-compact .brand-wordmark b{color:#f7f4ed}
+.member-card .brand-compact .brand-wordmark small{color:#b9b3a8}
+.member-number{letter-spacing:2px}
+.qr-button{border-radius:0;border-color:#bd202877;background:#bd20280c}
+.panel,.reward-card,.quick-info{background:#fbfaf7;border-color:#e2dfd7;border-radius:1px;box-shadow:0 10px 28px #17171408}
+.stamp-slot.earned{background:#bd2028;border-color:#bd2028}
+.stamp-slot.earned span{border-color:#ffffffaa}
+.progress-track{background:#e7e3db}.progress-track span{background:#bd2028}
+.welcome-card{background:#151514;border:1px solid #2c2b28}
+.welcome-card .eyebrow{color:#c9c2b6}
+.welcome-card p{color:#d0ccc4}
+.welcome-number{color:#bd202812}
+.reward-art,.reward-icon{background:#efede7;color:#bd2028}
+.reward-card{transition:transform .2s ease,border-color .2s ease}
+.reward-card:hover{transform:translateY(-2px);border-color:#c7b9b0}
+.button-dark,.admin-primary,.owner-submit{background:#11110f;border-color:#11110f;border-radius:0;letter-spacing:.7px}
+.button-dark:hover,.admin-primary:hover,.owner-submit:hover{background:#bd2028;border-color:#bd2028}
+.button-outline{border-radius:0;border-color:#d7d2c9}
+.button-outline:disabled{background:#f7f5f0;color:#999}
+.page-intro h2,.welcome-row h1{font-weight:600;letter-spacing:-1.2px}
+.history-icon{background:#f1eee8;color:#bd2028}
+.profile-avatar{border-radius:0;background:#171715;color:#f5f1e8}
+.member-state{border-radius:0;background:#f4e9e8;color:#a51d24;letter-spacing:1.5px}
+.mobile-nav{background:#fbfaf7;border-top-color:#dedbd4}
+.mobile-nav button.active{color:#bd2028}
+.sidebar-note{background:#eeece5;border-left:2px solid #bd2028}
+.modal{border:1px solid #dedbd4;border-radius:0;box-shadow:0 28px 90px #0004}
+.modal-head{border-bottom-color:#e6e1d8}
+.icon-button{border-radius:0;background:#f1eee8}
+.toast,.admin-toast{background:#11110f;border-left:3px solid #bd2028}
+.demo-ribbon,.admin-preview-ribbon{background:#bd2028}
+.admin-shell{background:#f4f2ed}
+.admin-sidebar{background:#10100f;border-right:1px solid #2b2926}
+.admin-sidebar .brand{padding-bottom:30px}
+.admin-sidebar .brand-mark{color:#bd2028!important}
+.admin-sidebar .brand-wordmark b{color:#f7f4ed}
+.admin-sidebar .brand-wordmark small{color:#aaa49a}
+.admin-workspace{border-color:#ffffff24;background:#ffffff05}
+.admin-nav{border-radius:0;letter-spacing:.2px}
+.admin-nav.active{background:#ffffff0d;color:#fff}
+.admin-nav.active:before{background:#bd2028}
+.admin-nav i{background:#bd2028}
+.admin-topbar{background:#fbfaf7;border-bottom-color:#dedbd4}
+.admin-content{max-width:1540px}
+.admin-title-row h1{font-weight:600;letter-spacing:-1.2px}
+.admin-demo-pill{background:#f3efea;border-color:#d9c8c4;color:#a51d24}
+.admin-stat-grid article,.admin-panel{background:#fbfaf7;border-color:#e2dfd7;border-radius:0;box-shadow:0 8px 24px #00000006}
+.admin-stat-grid b{font-weight:600;color:#171715}
+.admin-stat-grid small{color:#9b3938}
+.admin-primary{padding:12px 16px}
+.admin-small-button{border-radius:0;border-color:#d8d3ca;background:#fbfaf7}
+.admin-small-button:hover{border-color:#bd2028;color:#a51d24;background:#f8f2f0}
+.admin-table th{letter-spacing:1.5px}
+.admin-table td{border-bottom-color:#ece9e2}
+.admin-status{background:#f2e9e7;color:#a51d24}
+.admin-live-pill{background:#f2e9e7;border-color:#e5d0cc;color:#a51d24}
+.admin-form-panel input,.admin-add-form input,.admin-add-form select{border-radius:0;background:#fff;border-color:#ddd8cf}
+.admin-form-panel input:focus,.admin-add-form input:focus{border-color:#bd2028;outline:none}
+.admin-search{border-radius:0;border-color:#ddd8cf;background:#fff}
+.admin-qr-modal{border:1px solid #ddd8cf;box-shadow:0 24px 80px #0005}
+.admin-qr-modal .admin-primary{justify-content:center}
+.admin-qr-modal img{border:1px solid #e5e0d8}
+.owner-screen{background:#10100f}
+.owner-visual{background:radial-gradient(circle at 82% 18%,#3b2523 0,transparent 32%),linear-gradient(145deg,#20201e,#0d0d0c)}
+.owner-visual:after{content:"";background:none}
+.owner-copy .eyebrow{color:#bd2028}
+.owner-copy h1{font-weight:600;letter-spacing:-2.5px}
+.owner-login-side{background:#f4f2ed}
+.owner-login-card{border-color:#e2ded5;box-shadow:0 25px 70px #0000000a}
+.owner-login-card input{border-radius:0}
+.owner-login-card input:focus{border-color:#bd2028}
+.owner-mobile-brand .brand-mark{color:#bd2028!important}
+.public-member-page{background:#f2f0eb}
+.public-member-card{background:linear-gradient(145deg,#0d0d0c,#20201e);border:1px solid #393631;box-shadow:0 24px 70px #0002}
+.public-member-card .brand-mark{color:#bd2028!important}
+.public-member-card .brand-wordmark b{color:#fff}
+.public-member-card .brand-wordmark small{color:#b8b1a6}
+.public-member-card>strong{color:#bd2028}
+.public-member-monogram{border-color:#bd2028;color:#bd2028;border-radius:0}
+.member-print-card{background:linear-gradient(135deg,#10100f,#242321);border:0}
+.member-print-mark{border:0!important;color:#bd2028!important;width:9mm;height:10mm;padding:0}
+.member-print-mark .brand-emblem{width:100%;height:100%}
+.member-print-brand b{letter-spacing:1.6pt}
+.member-print-brand small{color:#bd2028;letter-spacing:2pt}
+.member-print-kicker{color:#d1aaa3}
+.member-print-identity small{color:#f0ece5}
+.member-print-footer{border-color:#bd202855;color:#c9c3b8}
+.admin-footer .brand-mark{color:#bd2028!important}
+.admin-footer .brand-wordmark b{color:#555}
+.admin-footer .brand-wordmark small{color:#888}
+@media(max-width:760px){
+ .topbar{background:#fbfaf7}
+ .member-card{height:248px}
+ .admin-sidebar{background:#10100f}
+ .admin-sidebar .brand-wordmark b{color:#fff}
+ .admin-sidebar .brand-wordmark small{color:#aaa49a}
+}
+@media print{
+ .member-print-card{background:#10100f!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
