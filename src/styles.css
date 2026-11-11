@@ -266,3 +266,42 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 @media print{
  .member-print-card{background:#10100f!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 }
+
+
+/* Admin document export + safe reset controls */
+.admin-title-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-reset-zone{margin-top:30px;padding:20px;border:1px solid #e5c8c4;background:#fbf4f2;display:grid;gap:10px}
+.admin-reset-zone h2{margin:0;font-size:18px}
+.admin-reset-zone p{margin:0;color:#68645e;font-size:11px;line-height:1.7}
+.admin-reset-zone small{color:#8f4a43;font-size:9px;line-height:1.6}
+.admin-document-print-action{background:#11110f;color:#fff;border-color:#11110f}
+@media(max-width:700px){.admin-title-actions{width:100%;justify-content:flex-start}.admin-title-row{align-items:flex-start;gap:12px}}
+@media print{
+ body.admin-document-print *{visibility:visible!important}
+ body.admin-document-print .member-print-sheet{display:none!important;visibility:hidden!important}
+ body.admin-document-print .admin-sidebar,
+ body.admin-document-print .admin-topbar,
+ body.admin-document-print .admin-footer,
+ body.admin-document-print .admin-document-print-action,
+ body.admin-document-print .admin-title-actions button,
+ body.admin-document-print .admin-action-row,
+ body.admin-document-print .admin-report-actions,
+ body.admin-document-print .member-card-toolbar,
+ body.admin-document-print .member-print-options,
+ body.admin-document-print .admin-add-form,
+ body.admin-document-print .admin-modal-backdrop,
+ body.admin-document-print .admin-toast{display:none!important}
+ body.admin-document-print .admin-shell,
+ body.admin-document-print .admin-main,
+ body.admin-document-print .admin-content{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;background:#fff!important}
+ body.admin-document-print .admin-panel{box-shadow:none!important;border:0!important;padding:0!important;break-inside:avoid}
+ body.admin-document-print .admin-title-row{margin:0 0 18px!important}
+ body.admin-document-print .admin-table-wrap{overflow:visible!important}
+ body.admin-document-print .admin-table{width:100%!important;font-size:9pt!important}
+ body.admin-document-print .admin-table th,
+ body.admin-document-print .admin-table td{padding:7px 5px!important;color:#111!important}
+ body.admin-document-print .admin-stat-grid{break-inside:avoid}
+ body.admin-document-print .admin-reset-zone{display:none!important}
+ body.admin-document-print .admin-main{min-height:0!important}
+ @page{size:A4 portrait;margin:12mm}
+}
