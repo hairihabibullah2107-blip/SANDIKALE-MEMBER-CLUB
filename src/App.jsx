@@ -192,6 +192,7 @@ export default function App() {
   const publicToken = params.get("token");
   if (params.get("register") === "1" || window.location.pathname.replace(/\/$/,"") === "/daftar") return <RegistrationPage/>;
   if (publicToken) return <PublicMemberCard token={publicToken}/>;
+  return <RegistrationPage/>;
   const [tab, setTab] = useState("home");
   const [stamps] = useState(6);
   const [modal, setModal] = useState(null);
