@@ -7,7 +7,8 @@ const dateText = value => value ? new Date(value).toLocaleDateString("id-ID", { 
 
 function Icon({ name }) {
   const paths = {
-    grid:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,\n    qr:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v2M14 20h2M20 19v2"/></>,
+    grid:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></>,
+    qr:<><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v2M14 20h2M20 19v2"/></>,
     users:<><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5"/></>,
     receipt:<><path d="M5 3h14v18l-3-2-4 2-4-2-3 2zM8 8h8M8 12h8M8 16h4"/></>,
     gift:<><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8H7.5a2.5 2.5 0 1 1 2.4-3.2L12 8Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 8Z"/></>,
@@ -43,7 +44,11 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   const [showClaimForm,setShowClaimForm]=useState(false);
   const [claimForm,setClaimForm]=useState({member_id:"",reward_id:""});
   const [reportMonth,setReportMonth]=useState(new Date().toISOString().slice(0,7));
-  const [qrMember,setQrMember]=useState(null);\n  const [scanToken,setScanToken]=useState("");\n  const [scanMember,setScanMember]=useState(null);\n  const [scanTotal,setScanTotal]=useState("85000");\n  const [scanResult,setScanResult]=useState(null);
+  const [qrMember,setQrMember]=useState(null);
+  const [scanToken,setScanToken]=useState("");
+  const [scanMember,setScanMember]=useState(null);
+  const [scanTotal,setScanTotal]=useState("85000");
+  const [scanResult,setScanResult]=useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true); setError("");
