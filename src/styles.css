@@ -59,3 +59,37 @@ body{background:#f4f3ef;color:var(--ink)}
 .admin-add-form button{align-self:end;justify-content:center;min-height:38px}
 .admin-empty{font-size:10px;color:#8b8981;line-height:1.7;padding:20px 2px;margin:0}
 @media(max-width:700px){.admin-add-form{grid-template-columns:1fr}.admin-add-form button{width:100%}.admin-user{gap:7px}.admin-user>span:nth-child(2){display:none}}
+
+/* Live loyalty modules */
+.admin-small-button{border:1px solid #dedbd2;background:#fff;padding:7px 10px;font:inherit;font-size:9px;color:#383832;cursor:pointer}
+.admin-small-button:hover{background:#f1f0eb}
+.admin-small-button.danger{color:#a33c32;border-color:#e8cbc7}
+.admin-review{display:inline-block;background:#f5f0e4;color:#8a6b28;padding:4px 7px;font-size:9px}
+.admin-action-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.admin-wide-field{grid-column:1/-1}
+.admin-add-form select,.admin-add-form input{display:block;width:100%;height:38px;border:1px solid #e4e2db;background:#fff;padding:0 10px;margin-top:7px;font:inherit;font-size:10px}
+.admin-month-filter{font-size:9px;color:#777;display:grid;gap:5px}
+.admin-month-filter input{border:1px solid #e5e2da;padding:8px;font:inherit}
+.admin-report-grid{margin:18px 0}
+.admin-report-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:16px}
+.admin-modal-backdrop{position:fixed;inset:0;background:#17171499;display:grid;place-items:center;z-index:50;padding:20px}
+.admin-qr-modal{position:relative;background:#fff;padding:28px;text-align:center;width:min(100%,340px);display:flex;align-items:center;flex-direction:column;gap:12px}
+.admin-qr-modal h2{font-size:20px;margin:0}
+.admin-qr-modal img{width:220px;height:220px;object-fit:contain;border:1px solid #eee;padding:8px}
+.admin-qr-modal p{font-size:11px;letter-spacing:1px}
+.admin-modal-close{position:absolute;right:12px;top:8px;border:0;background:none;font-size:25px;cursor:pointer}
+.public-member-page{min-height:100vh;background:#f2f1ed;display:grid;place-items:center;padding:22px}
+.public-member-card{width:min(100%,420px);min-height:530px;background:#171715;color:#fff;padding:28px;display:flex;flex-direction:column;align-items:flex-start;gap:22px;position:relative;overflow:hidden}
+.public-member-card .brand{color:#fff}
+.public-member-card .brand-mark{border-color:#fff}
+.public-member-card .eyebrow{color:#c9c7bf}
+.public-member-card h1{font-size:30px;line-height:1.1;margin:0}
+.public-member-card>strong{font-size:12px;letter-spacing:2px;color:#d3b47b}
+.public-member-monogram{width:64px;height:64px;border:1px solid #c8a66d;border-radius:50%;display:grid;place-items:center;font-size:28px;color:#d5b77e;margin-top:28px}
+.public-member-stats{display:flex;gap:42px;margin-top:auto}
+.public-member-stats div{display:grid;gap:4px}
+.public-member-stats b{font-size:26px}
+.public-member-stats small,.public-member-footer{font-size:9px;letter-spacing:1.6px;color:#b6b3a9}
+.public-member-card .muted{color:#c4c1b8;font-size:11px}
+.public-member-footer{padding-top:18px;border-top:1px solid #ffffff35;width:100%}
+@media print{.admin-sidebar,.admin-topbar,.admin-footer,.admin-report-actions{display:none!important}.admin-main{width:100%!important}.admin-content{padding:0!important}.admin-panel{box-shadow:none!important}}
