@@ -32,7 +32,7 @@ export default function AdminAuth({ children }) {
     async function loadStaffProfile() {
       if (!session?.user?.id) { setProfile(null); return; }
       const { data, error: queryError } = await supabase.from("mc_staff_profiles")
-        .select("user_id, role, display_name, is_active").eq("user_id", session.user.id).maybeSingle();
+        .select("auth_user_id, role, full_name, is_active").eq("auth_user_id", session.user.id).maybeSingle();
       if (!alive) return;
       if (queryError) { setError("Hak akses Owner belum dapat diperiksa. Muat ulang halaman."); setProfile(null); return; }
       if (!data || data.is_active !== true || !["owner", "admin"].includes(String(data.role).toLowerCase())) {
