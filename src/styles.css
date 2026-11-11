@@ -369,3 +369,25 @@ body{background:#f4f2ed;color:var(--luxury-black)}
  .member-thankyou{min-height:210px;padding:19px}
  .member-hero-card h2{font-size:22px}
 }
+
+
+/* Brand alignment: member portal follows the official Admin identity */
+.member-sidebar{background:#171717;color:#fff;border-right:1px solid #292929}
+.member-sidebar-brand{padding:0 8px 25px;margin-bottom:25px;border-bottom:1px solid #ffffff20}
+.member-sidebar-brand .brand{color:#fff;gap:10px}
+.member-sidebar-brand .brand-mark{border-color:#aaa;color:#fff}
+.member-sidebar-brand .brand-wordmark b{color:#fff}
+.member-sidebar-brand .brand-wordmark small{color:#aaa}
+.member-sidebar-brand>span,.member-sidebar-brand>small{display:block;font-size:8px;letter-spacing:1.5px;color:#aaa;margin-top:13px}
+.member-sidebar-brand>small{font-size:7px;letter-spacing:1.2px;color:#777;margin-top:5px}
+.member-sidebar .member-menu-label{display:block;color:#777;padding:0 8px}
+.member-sidebar nav button{color:#aaa;border-radius:2px}
+.member-sidebar nav button.active{background:#ffffff13;color:#fff;border-left:2px solid #bd2028}
+.member-topbar .brand{display:none}
+.member-topbar>span{font-size:9px;letter-spacing:1.6px;color:#8a887f}
+.member-topbar>span:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#81956c;margin-right:9px}
+@media(max-width:640px){
+ .member-sidebar{display:none}
+ .member-topbar .brand{display:flex}
+ .member-topbar>span{font-size:8px}
+}
