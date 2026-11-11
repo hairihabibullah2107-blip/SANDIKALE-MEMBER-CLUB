@@ -42,6 +42,8 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     const results = await Promise.all([
       supabase.from("mc_members").select("id,member_code,full_name,phone,email,status,total_stamps,total_points,joined_at").order("created_at",{ascending:false}).limit(500),
       supabase.from("mc_transactions").select("id,invoice_number,member_id,total,transaction_date,points_earned").order("transaction_date",{ascending:false}).limit(100),
+      supabase.from("mc_members").select("id",{count:"exact",head:true}),
+      supabase.from("mc_transactions").select("id",{count:"exact",head:true}),
       supabase.from("mc_stamps").select("id",{count:"exact",head:true}),
       supabase.from("mc_rewards").select("id",{count:"exact",head:true}),
       supabase.from("mc_reward_claims").select("id",{count:"exact",head:true})
@@ -52,11 +54,11 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     const transactionRows = results[1].data || [];
     setMembers(memberRows); setTransactions(transactionRows);
     setCounts({
-      members: memberRows.length,
-      transactions: transactionRows.length,
-      stamps: results[2].count || 0,
-      rewards: results[3].count || 0,
-      claims: results[4].count || 0
+      members: results[2].count ?? memberRows.length,
+      transactions: results[3].count ?? transactionRows.length,
+      stamps: results[4].count || 0,
+      rewards: results[5].count || 0,
+      claims: results[6].count || 0
     });
     const { data: ruleData } = await supabase.from("mc_settings").select("value").eq("key","loyalty_rules").maybeSingle();
     if (ruleData?.value) {
@@ -90,8 +92,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   async function saveRules(event) {
     event.preventDefault(); setSaving(true); setError("");
     const value = { minimum_transaction:Number(minimum), stamps_per_transaction:Number(stampsPerTransaction) };
-    const { data: userData } = await supabase.auth.getUser();
-    const { error: saveError } = await supabase.from("mc_settings").upsert({key:"loyalty_rules",value,updated_by:userData.user?.id || null,updated_at:new Date().toISOString()},{onConflict:"key"});
+    const { error: saveError } = await supabase.from("mc_settings").upsert({key:"loyalty_rules",value,updated_by:ownerProfile?.id || null,updated_at:new Date().toISOString()},{onConflict:"key"});
     setSaving(false);
     if (saveError) { setError("Aturan belum tersimpan: " + saveError.message); return; }
     notify("Aturan stamp tersimpan.");
