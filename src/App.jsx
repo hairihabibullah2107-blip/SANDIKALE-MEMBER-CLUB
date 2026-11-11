@@ -29,7 +29,7 @@ function Icon({ name }) {
 }
 
 function Brand({ compact = false }) {
-  return <div className={`brand ${compact ? "brand-compact" : ""}`}><span className="brand-mark">S</span><span><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
+  return <div className={`brand ${compact ? "brand-compact" : ""}`}><span className="brand-mark"><svg className="brand-emblem" viewBox="0 0 100 140" aria-hidden="true"><path d="M18 12 50 44 82 12M18 48 50 80 82 48M18 84 50 116 82 84M18 12 50 44 18 76M82 48 50 80 82 112M18 84 50 116 82 84" fill="none" stroke="currentColor" strokeWidth="12" strokeLinecap="square" strokeLinejoin="miter"/></svg></span><span className="brand-wordmark"><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
 }
 
 function MemberCard({ stamps, onShowQr }) {
