@@ -424,3 +424,11 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 .admin-reward-cell img{width:54px;height:46px;object-fit:cover;border:1px solid #e2dfd7}
 .admin-reward-cell span{display:grid;gap:4px}
 @media(max-width:640px){.member-reward-photo{height:165px}.member-reward-info{padding:15px}}
+
+.admin-upload-field{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.admin-upload-field>span{font-size:11px;font-weight:600;color:#272622}
+.admin-upload-field>small{font-size:10px;color:#8b867d}
+.admin-upload-button{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;background:#171715;color:#fff;border:1px solid #171715;font-size:10px;letter-spacing:.4px;cursor:pointer;min-width:155px}
+.admin-upload-button:hover{background:#bd2028;border-color:#bd2028}
+.admin-upload-button input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.admin-upload-button:has(input:disabled){opacity:.6;cursor:wait}
