@@ -406,3 +406,21 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 .member-social-link b{font-size:10px;overflow-wrap:anywhere}
 .member-social-link i{font-style:normal;margin-left:auto;color:#a19b90;font-size:14px}
 @media(max-width:560px){.member-social-links{grid-template-columns:1fr}.member-social-link{padding:12px}}
+
+.member-reward-grid{align-items:stretch}
+.member-reward-card{overflow:hidden;padding:0;display:flex;flex-direction:column}
+.member-reward-photo{width:100%;height:190px;background:#eeece6;overflow:hidden;display:grid;place-items:center}
+.member-reward-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.member-reward-photo-empty{background:linear-gradient(135deg,#222 0%,#383630 100%);color:#d8d2c5;padding:22px;text-align:center;gap:8px}
+.member-reward-photo-empty span{font-size:8px;letter-spacing:2px;color:#b9b2a5}
+.member-reward-photo-empty b{font-size:18px;letter-spacing:.3px}
+.member-reward-info{padding:20px;display:flex;flex-direction:column;align-items:flex-start;gap:9px;flex:1}
+.member-reward-info h3{margin:0}
+.member-reward-info p{margin:0;flex:1}
+.member-reward-info button{width:100%;margin-top:8px}
+.admin-reward-image-preview{width:160px;height:120px;border:1px solid #dedbd2;background:#f4f2ed;overflow:hidden}
+.admin-reward-image-preview img{width:100%;height:100%;object-fit:cover}
+.admin-reward-cell{display:flex;align-items:center;gap:10px;min-width:150px}
+.admin-reward-cell img{width:54px;height:46px;object-fit:cover;border:1px solid #e2dfd7}
+.admin-reward-cell span{display:grid;gap:4px}
+@media(max-width:640px){.member-reward-photo{height:165px}.member-reward-info{padding:15px}}
