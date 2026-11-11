@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "./supabase.js";
 
-const OWNER_EMAIL = "hairihabibullah2107@gmail.com";
-
 function Brand() {
   return <div className="brand"><span className="brand-mark">S</span><span><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
 }
@@ -11,7 +9,7 @@ export default function AdminAuth({ children }) {
   const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(true);
   const [profile, setProfile] = useState(null);
-  const [email, setEmail] = useState(OWNER_EMAIL);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,11 +44,8 @@ export default function AdminAuth({ children }) {
 
   async function signIn(event) {
     event.preventDefault(); setBusy(true); setError("");
-    if (email.trim().toLowerCase() !== OWNER_EMAIL) {
-      setBusy(false); setError("Gunakan email Owner yang telah ditetapkan."); return;
-    }
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: OWNER_EMAIL, password });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (signInError) {
         setError(`Autentikasi gagal: ${signInError.message}`);
       }
@@ -82,7 +77,7 @@ export default function AdminAuth({ children }) {
         <p>Masuk menggunakan akun Owner untuk melanjutkan ke dashboard pengelolaan.</p>
         <form onSubmit={signIn}>
           <label htmlFor="owner-email">EMAIL OWNER</label>
-          <input id="owner-email" autoComplete="username" type="email" required value={email} onChange={e=>setEmail(e.target.value)} />
+          <input id="owner-email" autoComplete="username" type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email akun staf" />
           <label htmlFor="owner-password">PIN / PASSWORD</label>
           <input id="owner-password" autoComplete="current-password" type="password" required value={password} onChange={e=>setPassword(e.target.value)} placeholder="Masukkan PIN atau password" />
           {error && <div className="owner-error" role="alert">{error}</div>}
