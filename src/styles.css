@@ -441,3 +441,12 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 .admin-reward-image-preview img{width:100%;height:100%;object-fit:contain;object-position:center}
 .admin-reward-cell img{width:54px;height:46px;object-fit:contain;object-position:center;background:#f4f2ed;padding:2px;box-sizing:border-box}
 @media(max-width:640px){.member-reward-photo{height:190px;padding:10px}}
+
+
+/* Square reward image system: fixed 1:1 frame, full image preserved */
+.member-reward-photo{width:100%;height:auto;aspect-ratio:1/1;padding:14px;box-sizing:border-box;display:grid;place-items:center;background:#f1efe9;overflow:hidden}
+.member-reward-photo img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;display:block}
+.admin-reward-image-preview{width:160px;height:auto;aspect-ratio:1/1;padding:8px;box-sizing:border-box;display:grid;place-items:center;background:#f1efe9;overflow:hidden}
+.admin-reward-image-preview img{width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;display:block}
+.admin-reward-cell img{width:54px;height:54px;aspect-ratio:1/1;flex:0 0 54px;object-fit:contain;object-position:center;background:#f1efe9;padding:4px;box-sizing:border-box}
+@media(max-width:640px){.member-reward-photo{height:auto;aspect-ratio:1/1;padding:12px}}
