@@ -29,7 +29,7 @@ function Icon({ name }) {
 }
 
 function Brand({ compact = false }) {
-  return <div className={`brand ${compact ? "brand-compact" : ""}`}><span className="brand-mark"><svg className="brand-emblem" viewBox="0 0 100 140" aria-hidden="true"><path d="M18 12 50 44 82 12M18 48 50 80 82 48M18 84 50 116 82 84M18 12 50 44 18 76M82 48 50 80 82 112M18 84 50 116 82 84" fill="none" stroke="currentColor" strokeWidth="12" strokeLinecap="square" strokeLinejoin="miter"/></svg></span><span className="brand-wordmark"><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
+  return <div className={`brand ${compact ? "brand-compact" : ""}`}><span className="brand-mark"><svg className="brand-emblem" viewBox="0 0 1365 2048" aria-hidden="true" role="img"><path d="M465,0 L342,124 L558,341 L341,558 L124,342 L0,465 L558,1023 L404,1179 L527,1302 L682,1147 L900,1365 L682,1582 L341,1241 L0,1582 L124,1705 L341,1489 L558,1706 L342,1924 L465,2047 L682,1830 L899,2047 L1023,1923 L806,1706 L1023,1489 L1240,1705 L1364,1582 L806,1024 L961,868 L837,745 L682,900 L465,682 L683,465 L1024,805 L1364,465 L1240,342 L1023,558 L806,341 L1023,124 L899,0 L682,217 Z" fill="currentColor"/></svg></span><span className="brand-wordmark"><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
 }
 
 function MemberCard({ stamps, onShowQr }) {
