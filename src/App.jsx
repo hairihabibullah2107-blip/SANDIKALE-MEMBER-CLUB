@@ -130,7 +130,7 @@ function RegistrationPage() {
 export default function App() {
   const params = new URLSearchParams(window.location.search);
   const publicToken = params.get("token");
-  if (params.get("register") === "1" || window.location.pathname.replace(/\\/$/,"") === "/daftar") return <RegistrationPage/>;
+  if (params.get("register") === "1" || window.location.pathname.replace(/\/$/,"") === "/daftar") return <RegistrationPage/>;
   if (publicToken) return <PublicMemberCard token={publicToken}/>;
   const [tab, setTab] = useState("home");
   const [stamps] = useState(6);
