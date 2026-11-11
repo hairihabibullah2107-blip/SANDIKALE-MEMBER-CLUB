@@ -72,11 +72,70 @@ function Modal({ title, children, onClose }) {
 }
 
 function PublicMemberCard({token}) {
-  const [member,setMember]=useState(null);
+  const [dashboard,setDashboard]=useState(null);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState("");
-  useEffect(()=>{let alive=true;(async()=>{const {data,error}=await supabase.rpc("mc_get_public_member_card",{p_token:token});if(!alive)return;if(error)setError("Kartu member belum dapat dibuka.");else if(!data?.length)setError("QR tidak valid atau member tidak aktif.");else setMember(data[0]);setLoading(false);})();return()=>{alive=false;};},[token]);
-  return <main className="public-member-page"><div className="public-member-card"><Brand/><span className="eyebrow">DIGITAL MEMBERSHIP CARD</span>{loading?<p>Memuat kartu member…</p>:error?<p>{error}</p>:<><div className="public-member-monogram">S</div><h1>{member.full_name}</h1><strong>{member.member_code}</strong><div className="public-member-stats"><div><b>{member.total_stamps}</b><small>STAMP</small></div><div><b>{member.total_points}</b><small>POIN</small></div></div><p className="muted">Member aktif SANDIKALE MEMBER CLUB</p></>}<small className="public-member-footer">SANDIKALE • MEMBER CLUB</small></div></main>;
+  const [notice,setNotice]=useState("");
+  const [claiming,setClaiming]=useState("");
+  const memberUrl=window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(token);
+  const loadDashboard=async()=>{
+    setLoading(true);setError("");
+    const {data,error:rpcError}=await supabase.rpc("mc_get_member_dashboard",{p_token:token});
+    if(rpcError){setError(rpcError.message||"Dashboard member belum dapat dimuat.");setDashboard(null);}
+    else setDashboard(data);
+    setLoading(false);
+  };
+  useEffect(()=>{loadDashboard();},[token]);
+  async function claim(reward){
+    if(!window.confirm("Ajukan penukaran "+reward.name+"? Permintaan akan menunggu verifikasi kasir SANDIKALE."))return;
+    setClaiming(reward.id);setNotice("");setError("");
+    const {error:claimError}=await supabase.rpc("mc_member_claim_reward",{p_token:token,p_reward_id:reward.id});
+    setClaiming("");
+    if(claimError){setError(claimError.message||"Permintaan reward gagal dikirim.");return;}
+    setNotice("Permintaan reward berhasil dikirim. Tunggu verifikasi dari SANDIKALE.");
+    await loadDashboard();
+  }
+  const fmtDate=value=>value?new Date(value).toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}):"—";
+  const fmtMoney=value=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(value||0));
+  const statusLabel=value=>({pending:"Menunggu",approved:"Disetujui",fulfilled:"Selesai",cancelled:"Dibatalkan"}[value]||value);
+  const panel={background:"#fff",border:"1px solid #e7e6df",padding:20,marginTop:16};
+  const metric={background:"#292929",padding:18,flex:1,minWidth:110};
+  return <main className="public-member-page"><div style={{width:"100%",maxWidth:760,margin:"0 auto",padding:"24px 14px 48px",fontFamily:"'DM Sans',sans-serif"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}><Brand/><span style={{fontSize:10,letterSpacing:2,color:"#777"}}>MEMBER DASHBOARD</span></div>
+    {loading?<section style={panel}><p>Memuat dashboard member…</p></section>:error&&!dashboard?<section style={panel}><h2>Dashboard belum dapat dibuka</h2><p>{error}</p><button onClick={loadDashboard}>Coba lagi</button></section>:dashboard&&<>
+      <section style={{...panel,background:"#191919",color:"#fff",padding:24,marginTop:24}}>
+        <span style={{fontSize:10,letterSpacing:2,color:"#aaa"}}>SANDIKALE DIGITAL MEMBER CARD</span>
+        <h1 style={{fontSize:28,margin:"12px 0 4px"}}>{dashboard.member.full_name}</h1>
+        <b style={{color:"#ddd"}}>{dashboard.member.member_code}</b>
+        <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:22}}>
+          <div style={metric}><b style={{fontSize:30}}>{dashboard.member.total_stamps}</b><small style={{display:"block",color:"#bbb"}}>TOTAL STAMP</small></div>
+          <div style={metric}><b style={{fontSize:30}}>{dashboard.member.total_points}</b><small style={{display:"block",color:"#bbb"}}>TOTAL POIN</small></div>
+          <div style={metric}><b style={{fontSize:30}}>{dashboard.available_points}</b><small style={{display:"block",color:"#bbb"}}>POIN TERSEDIA</small></div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:18,marginTop:20,flexWrap:"wrap"}}>
+          <img alt="QR member SANDIKALE" style={{width:132,height:132,background:"#fff",padding:7}} src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(memberUrl)}/>
+          <div style={{fontSize:12,color:"#ccc",lineHeight:1.7,maxWidth:300}}>Tunjukkan QR ini kepada kasir setiap kali bertransaksi agar stamp dan poin kamu tercatat otomatis.<br/>Bergabung sejak {fmtDate(dashboard.member.joined_at)}.</div>
+        </div>
+      </section>
+      {error&&<p role="alert" style={{...panel,color:"#9b2525",marginTop:12}}>{error}</p>}
+      {notice&&<p role="status" style={{...panel,color:"#23633b",marginTop:12}}>{notice}</p>}
+      <section style={panel}><h2 style={{marginTop:0}}>Reward tersedia</h2><p style={{fontSize:13,color:"#777"}}>Gunakan poin tersedia untuk mengajukan penukaran. Kasir akan memproses permintaan kamu.</p>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:12}}>
+          {(dashboard.rewards||[]).map(reward=><article key={reward.id} style={{border:"1px solid #e8e7e1",padding:16,display:"flex",flexDirection:"column",gap:8}}>
+            <b>{reward.name}</b><span style={{fontSize:12,color:"#777"}}>{reward.description||"Reward khusus member SANDIKALE"}</span>
+            <strong>{reward.points_cost} poin</strong><small style={{color:"#777"}}>Stok: {reward.stock===null?"Tersedia":reward.stock}</small>
+            <button disabled={claiming===reward.id||dashboard.available_points<reward.points_cost||(reward.stock!==null&&reward.stock<1)} onClick={()=>claim(reward)} style={{marginTop:"auto",padding:12,background:"#191919",color:"#fff",border:0,opacity:(dashboard.available_points<reward.points_cost||(reward.stock!==null&&reward.stock<1))?0.45:1}}>
+              {claiming===reward.id?"Mengirim…":dashboard.available_points<reward.points_cost?"Poin belum cukup":reward.stock===0?"Stok habis":"Ajukan reward"}
+            </button>
+          </article>)}
+          {!dashboard.rewards?.length&&<p>Belum ada reward aktif.</p>}
+        </div>
+      </section>
+      <section style={panel}><h2 style={{marginTop:0}}>Riwayat transaksi</h2>{dashboard.transactions?.length?dashboard.transactions.map((item,index)=><div key={item.invoice_number||index} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"12px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.invoice_number}</b><div style={{color:"#777"}}>{fmtDate(item.transaction_date)}</div></div><div style={{textAlign:"right"}}><b>{fmtMoney(item.total)}</b><div style={{color:"#47724c"}}>+{item.points_earned} poin</div></div></div>):<p style={{color:"#777"}}>Belum ada transaksi tercatat.</p>}</section>
+      <section style={panel}><h2 style={{marginTop:0}}>Status penukaran reward</h2>{dashboard.claims?.length?dashboard.claims.map(item=><div key={item.id} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"10px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.reward_name}</b><div style={{color:"#777"}}>{fmtDate(item.claimed_at)} • {item.points_spent} poin</div></div><strong>{statusLabel(item.status)}</strong></div>):<p style={{color:"#777"}}>Belum ada permintaan penukaran.</p>}</section>
+      <p style={{textAlign:"center",fontSize:11,color:"#888",marginTop:24}}>SANDIKALE • MEMBER CLUB</p>
+    </>}
+  </div></main>;
 }
 
 
@@ -94,7 +153,8 @@ function RegistrationPage() {
     });
     setSaving(false);
     if(rpcError){setError(rpcError.message||"Pendaftaran belum berhasil.");return;}
-    setMember(data);
+    if(!data?.public_token){setError("Pendaftaran berhasil diproses, tetapi tautan dashboard tidak tersedia. Hubungi SANDIKALE.");return;}
+    window.location.replace(window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(data.public_token));
   }
   async function copyLink(){
     try{await navigator.clipboard.writeText(memberUrl);setCopied(true);}catch{setError("Browser tidak mengizinkan salin otomatis. Salin tautan secara manual.");}
