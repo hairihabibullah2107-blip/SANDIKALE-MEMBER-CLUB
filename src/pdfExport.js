@@ -1,7 +1,3 @@
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-import QRCode from "qrcode";
-
 export async function captureElementCanvas(element, options = {}) {
   if (!element) throw new Error("Elemen dokumen tidak ditemukan.");
   const {
@@ -11,6 +7,7 @@ export async function captureElementCanvas(element, options = {}) {
     qrValue = null
   } = options;
 
+  const [{ default: html2canvas }, { default: QRCode }] = await Promise.all([import("html2canvas"), import("qrcode")]);
   const rect = element.getBoundingClientRect();
   const clone = element.cloneNode(true);
   if (clone.matches?.("[data-pdf-ignore]")) clone.remove();
@@ -85,6 +82,7 @@ export async function captureElementCanvas(element, options = {}) {
 
 export async function downloadElementPdf(element, filename, options = {}) {
   const { widthMm = null, marginMm = 10, orientation = "portrait" } = options;
+  const [{ jsPDF }] = await Promise.all([import("jspdf")]);
   const canvas = await captureElementCanvas(element, options);
   const pdf = new jsPDF({ orientation, unit: "mm", format: "a4", compress: true });
   const pageWidth = pdf.internal.pageSize.getWidth();
