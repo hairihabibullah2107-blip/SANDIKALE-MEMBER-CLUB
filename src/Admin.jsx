@@ -168,6 +168,15 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
   }
   function memberShareUrl(m){return window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(m.public_token);}
   async function shareMember(m){setQrMember(m);const url=memberShareUrl(m);try{await navigator.clipboard.writeText(url);notify("Link QR disalin. QR siap dibagikan.");}catch{notify("QR member siap ditampilkan.");}}
+  async function deleteMember(m){
+    if(!window.confirm("Hapus member "+m.full_name+" ("+m.member_code+")? Data transaksi dan riwayat reward akan tetap disimpan, tetapi identitas pribadi dan QR lama akan dinonaktifkan."))return;
+    setSaving(true);setError("");
+    const {error:deleteError}=await supabase.rpc("mc_delete_member",{p_member_id:m.id});
+    setSaving(false);
+    if(deleteError){setError("Member gagal dihapus: "+deleteError.message);return;}
+    notify("Member dihapus. Riwayat transaksi tetap tersimpan.");
+    await loadData();
+  }
 
 
   async function handleScannedValue(raw) {
@@ -210,7 +219,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
         {active==="Ringkasan" && <>
           <div className="admin-stat-grid"><article><span>Total Member</span><b>{counts.members.toLocaleString("id-ID")}</b><small>Data member tersimpan</small></article><article><span>Stamp Diberikan</span><b>{counts.stamps.toLocaleString("id-ID")}</b><small>Akumulasi stamp</small></article><article><span>Transaksi Tercatat</span><b>{counts.transactions.toLocaleString("id-ID")}</b><small>Riwayat transaksi</small></article><article><span>Reward Tersedia</span><b>{counts.rewards.toLocaleString("id-ID")}</b><small>{counts.claims} permintaan penukaran</small></article></div>
           <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">LATEST ACTIVITY</span><h2>Transaksi terbaru</h2></div><button className="admin-text-button" onClick={()=>setActive("Transaksi")}>Lihat semua <Icon name="arrow"/></button></div><TransactionTable transactions={transactions.slice(0,8)} memberById={memberById} loading={loading}/></section>
-          <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">MEMBER OVERVIEW</span><h2>Member terbaru</h2></div><button className="admin-text-button" onClick={()=>setActive("Member")}>Kelola member <Icon name="arrow"/></button></div><MemberTable members={members.slice(0,5)} loading={loading} onShare={shareMember}/></section>
+          <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">MEMBER OVERVIEW</span><h2>Member terbaru</h2></div><button className="admin-text-button" onClick={()=>setActive("Member")}>Kelola member <Icon name="arrow"/></button></div><MemberTable members={members.slice(0,5)} loading={loading} onShare={shareMember} onDelete={deleteMember}/></section>
         </>}
         {active==="Member" && <section className="admin-panel admin-table-panel"><div className="admin-panel-head"><div><span className="admin-eyebrow">CUSTOMER DATABASE</span><h2>Daftar member ({members.length})</h2></div><button className="admin-primary" onClick={()=>setShowAdd(v=>!v)}><Icon name="plus"/>{showAdd?"Tutup form":"Tambah member"}</button></div>
           {showAdd && <form className="admin-add-form" onSubmit={addMember}><label>Nama lengkap<input value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} placeholder="Nama pelanggan" required/></label><label>Nomor WhatsApp<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08xxxxxxxxxx" required/></label><label>Email (opsional)<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@contoh.com"/></label><button className="admin-primary" disabled={saving}>{saving?"Menyimpan…":"Simpan member"}</button></form>}
@@ -261,10 +270,10 @@ function ReportSummary({transactions,members,claims,month}) {
   const completed=claims.filter(cl=>cl.status==="fulfilled"&&(cl.processed_at||cl.claimed_at).slice(0,7)===month).length;
   return <div className="admin-stat-grid admin-report-grid"><article><span>Omzet tercatat</span><b>{money(revenue)}</b><small>{rows.length} transaksi dalam data termuat</small></article><article><span>Total member</span><b>{members.length}</b><small>Data member termuat</small></article><article><span>Poin diberikan</span><b>{points}</b><small>Dari transaksi periode ini</small></article><article><span>Reward diserahkan</span><b>{completed}</b><small>Penukaran selesai</small></article></div>;
 }
-function MemberTable({members,loading,onShare}) {
+function MemberTable({members,loading,onShare,onDelete}) {
   if (loading) return <p className="admin-empty">Memuat data member…</p>;
   if (!members.length) return <p className="admin-empty">Belum ada member tersimpan. Gunakan tombol “Tambah member” untuk membuat data pertama.</p>;
-  return <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>MEMBER</th><th>NOMOR WHATSAPP</th><th>STAMP</th><th>STATUS</th><th>TERDAFTAR</th><th>QR MEMBER</th></tr></thead><tbody>{members.map(m=><tr key={m.id}><td><b>{m.full_name}</b><small>{m.member_code}</small></td><td>{m.phone}</td><td><b>{m.total_stamps}</b></td><td><span className={m.status==="active"?"admin-status":"admin-pending"}>{m.status==="active"?"Aktif":m.status}</span></td><td>{dateText(m.joined_at)}</td><td><button className="admin-small-button" onClick={()=>onShare?.(m)}>Bagikan QR</button></td></tr>)}</tbody></table></div>;
+  return <div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>MEMBER</th><th>NOMOR WHATSAPP</th><th>STAMP</th><th>STATUS</th><th>TERDAFTAR</th><th>QR MEMBER</th><th>AKSI</th></tr></thead><tbody>{members.map(m=><tr key={m.id}><td><b>{m.full_name}</b><small>{m.member_code}</small></td><td>{m.phone}</td><td><b>{m.total_stamps}</b></td><td><span className={m.status==="active"?"admin-status":"admin-pending"}>{m.status==="active"?"Aktif":m.full_name==="Member dihapus"?"Dihapus":m.status}</span></td><td>{dateText(m.joined_at)}</td><td>{m.status==="active"?<button className="admin-small-button" onClick={()=>onShare?.(m)}>Bagikan QR</button>:<span className="admin-footnote">Tidak aktif</span>}</td><td>{m.full_name==="Member dihapus"?<span className="admin-footnote">Data diarsipkan</span>:<button className="admin-small-button danger" onClick={()=>onDelete?.(m)}>Hapus</button>}</td></tr>)}</tbody></table></div>;
 }
 function TransactionTable({transactions,memberById,loading}) {
   if (loading) return <p className="admin-empty">Memuat transaksi…</p>;
