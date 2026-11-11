@@ -1,0 +1,18 @@
+{
+  "name": "SANDIKALE Control Center",
+  "short_name": "SANDIKALE",
+  "description": "Pusat akses pribadi sistem digital SANDIKALE.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0b0b0c",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
