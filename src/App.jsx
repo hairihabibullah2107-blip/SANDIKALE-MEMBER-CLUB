@@ -133,6 +133,31 @@ function PublicMemberCard({token}) {
       </section>
       <section style={panel}><h2 style={{marginTop:0}}>Riwayat transaksi</h2>{dashboard.transactions?.length?dashboard.transactions.map((item,index)=><div key={item.invoice_number||index} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"12px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.invoice_number}</b><div style={{color:"#777"}}>{fmtDate(item.transaction_date)}</div></div><div style={{textAlign:"right"}}><b>{fmtMoney(item.total)}</b><div style={{color:"#47724c"}}>+{item.points_earned} poin</div></div></div>):<p style={{color:"#777"}}>Belum ada transaksi tercatat.</p>}</section>
       <section style={panel}><h2 style={{marginTop:0}}>Status penukaran reward</h2>{dashboard.claims?.length?dashboard.claims.map(item=><div key={item.id} style={{display:"flex",justifyContent:"space-between",gap:12,padding:"10px 0",borderBottom:"1px solid #eee",fontSize:13}}><div><b>{item.reward_name}</b><div style={{color:"#777"}}>{fmtDate(item.claimed_at)} • {item.points_spent} poin</div></div><strong>{statusLabel(item.status)}</strong></div>):<p style={{color:"#777"}}>Belum ada permintaan penukaran.</p>}</section>
+      <section style={{...panel,background:"#f8f7f3",borderColor:"#dedbd1"}}>
+        <div style={{fontSize:10,letterSpacing:2,color:"#8b8579",fontWeight:700}}>WE ARE HERE TO HELP</div>
+        <h2 style={{margin:"8px 0 6px",fontSize:21,color:"#191919"}}>Hubungi & kunjungi SANDIKALE</h2>
+        <p style={{fontSize:13,color:"#777",lineHeight:1.6,marginTop:0}}>Butuh bantuan terkait poin, stamp, reward, atau pesanan? Hubungi admin atau kunjungi toko kami.</p>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(205px,1fr))",gap:10,marginTop:16}}>
+          <a href="https://www.google.com/maps/search/?api=1&query=Dusun+Penangke%2C+Desa+Sesaot%2C+Kecamatan+Narmada%2C+Kabupaten+Lombok+Barat%2C+NTB" target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#fff",border:"1px solid #e7e6df",color:"#191919",textDecoration:"none"}}>
+            <span style={{fontSize:10,letterSpacing:1.5,color:"#8b8579",fontWeight:700}}>LOKASI TOKO</span>
+            <strong style={{display:"block",fontSize:14,marginTop:8,lineHeight:1.5}}>Dusun Penangke, Desa Sesaot</strong>
+            <span style={{display:"block",fontSize:12,color:"#777",lineHeight:1.6,marginTop:4}}>Kec. Narmada, Kab. Lombok Barat, NTB</span>
+            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Lihat petunjuk lokasi ↗</span>
+          </a>
+          <a href="https://www.instagram.com/_sandikale/" target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#fff",border:"1px solid #e7e6df",color:"#191919",textDecoration:"none"}}>
+            <span style={{fontSize:10,letterSpacing:1.5,color:"#8b8579",fontWeight:700}}>INSTAGRAM</span>
+            <strong style={{display:"block",fontSize:14,marginTop:8}}>@_sandikale</strong>
+            <span style={{display:"block",fontSize:12,color:"#777",lineHeight:1.6,marginTop:4}}>Lihat karya, produk, dan informasi terbaru SANDIKALE.</span>
+            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Kunjungi Instagram ↗</span>
+          </a>
+          <a href="https://wa.me/6282266412844?text=Halo%20Admin%20SANDIKALE%2C%20saya%20member%20SANDIKALE%20ingin%20bertanya." target="_blank" rel="noreferrer" style={{display:"block",padding:16,background:"#191919",border:"1px solid #191919",color:"#fff",textDecoration:"none"}}>
+            <span style={{fontSize:10,letterSpacing:1.5,color:"#c9c4b8",fontWeight:700}}>WHATSAPP ADMIN</span>
+            <strong style={{display:"block",fontSize:14,marginTop:8}}>+62 822-6641-2844</strong>
+            <span style={{display:"block",fontSize:12,color:"#d0cec8",lineHeight:1.6,marginTop:4}}>Tanyakan bantuan member dan layanan SANDIKALE langsung ke admin.</span>
+            <span style={{display:"inline-block",fontSize:11,fontWeight:700,marginTop:12}}>Chat admin sekarang ↗</span>
+          </a>
+        </div>
+      </section>
       <p style={{textAlign:"center",fontSize:11,color:"#888",marginTop:24}}>SANDIKALE • MEMBER CLUB</p>
     </>}
   </div></main>;
