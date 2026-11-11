@@ -93,3 +93,49 @@ body{background:#f4f3ef;color:var(--ink)}
 .public-member-card .muted{color:#c4c1b8;font-size:11px}
 .public-member-footer{padding-top:18px;border-top:1px solid #ffffff35;width:100%}
 @media print{.admin-sidebar,.admin-topbar,.admin-footer,.admin-report-actions{display:none!important}.admin-main{width:100%!important}.admin-content{padding:0!important}.admin-panel{box-shadow:none!important}}
+
+
+/* Member QR card studio — screen and print */
+.member-card-toolbar,.member-print-options{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:18px 0}
+.member-selected-count{font-size:10px;color:#777;margin-left:auto}
+.member-print-options{justify-content:space-between;padding:13px;background:#f7f6f2;border:1px solid #e8e6df}
+.member-print-options label{display:flex;align-items:center;gap:10px;font-size:10px;color:#777}
+.member-print-options select{height:36px;border:1px solid #dedbd2;background:#fff;padding:0 10px;font:inherit;font-size:10px}
+.member-print-sheet{display:none}
+.admin-qr-modal .admin-qr-link{font-size:9px;line-height:1.5;color:#777;overflow-wrap:anywhere;background:#f5f4f0;padding:9px;width:100%}
+.admin-qr-modal .admin-small-button{width:100%;padding:11px}
+.member-print-card{width:85.6mm;height:54mm;background:#171816;color:#fff;padding:4mm;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;position:relative;border:0}
+.member-print-brand{display:flex;align-items:center;gap:2.5mm}
+.member-print-mark{width:8mm;height:8mm;border:0.35mm solid #c9b99b;display:grid;place-items:center;font:800 16pt Manrope,sans-serif;color:#fff}
+.member-print-brand b,.member-print-brand small{display:block}
+.member-print-brand b{font:800 8pt Manrope,sans-serif;letter-spacing:1.2pt}
+.member-print-brand small{font:6pt 'DM Sans',sans-serif;letter-spacing:1.8pt;color:#c8c3b8;margin-top:1mm}
+.member-print-body{display:flex;align-items:center;justify-content:space-between;gap:3mm}
+.member-print-identity{min-width:0;display:flex;flex-direction:column;gap:1.4mm}
+.member-print-kicker{font:700 5.5pt 'DM Sans',sans-serif;letter-spacing:1.2pt;color:#c5b18b}
+.member-print-identity b{font:700 11pt Manrope,sans-serif;line-height:1.1;overflow-wrap:anywhere}
+.member-print-identity small{font:700 7pt 'DM Sans',sans-serif;letter-spacing:1.3pt;color:#d8d3c9}
+.member-print-note{font:500 5pt 'DM Sans',sans-serif;letter-spacing:.5pt;color:#c3c0b8;max-width:43mm}
+.member-print-body img{width:27mm;height:27mm;object-fit:contain;background:#fff;padding:1.2mm;flex-shrink:0}
+.member-print-footer{border-top:.2mm solid #ffffff55;padding-top:2mm;display:flex;justify-content:space-between;gap:2mm;font:600 4.5pt 'DM Sans',sans-serif;letter-spacing:.6pt;color:#c8c3b8}
+.member-print-sheet.is-keychain .member-print-card{width:52mm;height:82mm;padding:4mm;align-items:center}
+.member-print-sheet.is-keychain .member-print-brand{align-self:flex-start}
+.member-print-sheet.is-keychain .member-print-body{flex-direction:column;justify-content:center;gap:3mm;text-align:center;flex:1}
+.member-print-sheet.is-keychain .member-print-identity{align-items:center}
+.member-print-sheet.is-keychain .member-print-identity b{font-size:10pt}
+.member-print-sheet.is-keychain .member-print-note{max-width:43mm;text-align:center}
+.member-print-sheet.is-keychain .member-print-body img{width:30mm;height:30mm}
+.member-print-sheet.is-keychain .member-print-footer{width:100%;justify-content:center;text-align:center}
+@media(max-width:650px){.member-print-options{align-items:stretch;flex-direction:column}.member-print-options label{justify-content:space-between}.member-print-options select{max-width:62%}.member-print-options .admin-primary{justify-content:center}.member-selected-count{margin-left:0;width:100%}}
+@page{size:A4 portrait;margin:8mm}
+@media print{
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  body *{visibility:hidden!important}
+  .member-print-sheet,.member-print-sheet *{visibility:visible!important}
+  .member-print-sheet{display:grid!important;position:absolute!important;left:0!important;top:0!important;width:194mm!important;margin:0!important;padding:0!important;gap:4mm 8mm!important;justify-content:center!important;align-content:start!important}
+  .member-print-sheet.is-card{grid-template-columns:repeat(2,85.6mm)!important}
+  .member-print-sheet.is-keychain{grid-template-columns:repeat(3,52mm)!important;gap:5mm!important}
+  .member-print-card{break-inside:avoid!important;page-break-inside:avoid!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .member-print-sheet.is-card .member-print-card:nth-child(8n){break-after:page!important;page-break-after:always!important}
+  .member-print-sheet.is-keychain .member-print-card:nth-child(9n){break-after:page!important;page-break-after:always!important}
+}
