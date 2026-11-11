@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase.js";
 import { downloadElementPdf, captureElementCanvas } from "./pdfExport.js";
-import { jsPDF } from "jspdf";
 
 const NAV = ["Ringkasan", "Member", "Kartu Member", "QR Pendaftaran", "Transaksi", "Scan QR", "Aturan Stamp", "Reward", "Penukaran", "Laporan", "Pengaturan"];
 const money = value => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(value || 0));
@@ -283,6 +282,7 @@ export default function Admin({ ownerProfile, onOwnerSignOut }) {
     const cards=Array.from(sheet?.querySelectorAll(".member-print-card")||[]);
     if(!sheet||cards.length!==selectedPrintMembers.length){setSaving(false);setError("Tampilan kartu belum siap. Muat ulang halaman lalu coba kembali.");return;}
     try{
+      const {jsPDF}=await import("jspdf");
       await document.fonts?.ready;
       const keychain=printFormat==="keychain";
       const cardW=keychain?52:85.6,cardH=keychain?82:54;
