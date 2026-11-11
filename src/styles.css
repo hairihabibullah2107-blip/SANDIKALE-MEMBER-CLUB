@@ -394,3 +394,15 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 
 .stamp-brand-symbol{display:grid;place-items:center;width:23px;height:23px;color:#bd2028}.stamp-brand-symbol svg{display:block;width:100%;height:100%}
 .stamp-slot.earned .stamp-brand-symbol{color:#f7f4ed}
+
+.member-social-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.member-social-link{display:flex;align-items:center;gap:12px;min-width:0;padding:13px 14px;background:#f4f2ed;border:1px solid #e2dfd7;text-decoration:none!important;color:#171715!important;transition:background .2s,border-color .2s}
+.member-social-link:hover{background:#ebe8e0;border-color:#c9c3b7}
+.member-social-link svg{width:27px;height:27px;flex:0 0 27px}
+.member-social-link.instagram svg{color:#bd2028}
+.member-social-link.whatsapp svg{color:#171715}
+.member-social-link span{display:grid;gap:4px;min-width:0}
+.member-social-link small{font-size:7px;letter-spacing:1.6px;color:#89847a}
+.member-social-link b{font-size:10px;overflow-wrap:anywhere}
+.member-social-link i{font-style:normal;margin-left:auto;color:#a19b90;font-size:14px}
+@media(max-width:560px){.member-social-links{grid-template-columns:1fr}.member-social-link{padding:12px}}
