@@ -15,16 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
+          package-manager-cache: false
       - name: Install dependencies
         run: npm install
       - name: Dependency security audit
         run: |
           npm audit --json > npm-audit.json || true
           node -e "const a=require('./npm-audit.json'); for (const [name,v] of Object.entries(a.vulnerabilities||{})) console.log(name+' | '+v.severity+' | fix='+JSON.stringify(v.fixAvailable)+' | '+v.via.map(x=>typeof x==='string'?x:x.title).join('; '))"
+          npm audit --audit-level=high
       - name: Build production bundle
         run: npm run build
