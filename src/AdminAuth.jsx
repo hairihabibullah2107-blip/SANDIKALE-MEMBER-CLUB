@@ -33,8 +33,8 @@ export default function AdminAuth({ children }) {
         .select("auth_user_id, role, full_name, is_active").eq("auth_user_id", session.user.id).maybeSingle();
       if (!alive) return;
       if (queryError) { setError("Hak akses Owner belum dapat diperiksa. Muat ulang halaman."); setProfile(null); return; }
-      if (!data || data.is_active !== true || !["owner", "admin"].includes(String(data.role).toLowerCase())) {
-        setError("Akun berhasil masuk, tetapi belum memiliki hak Owner/Admin aktif. Hubungi pengelola sistem."); setProfile(null); return;
+      if (!data || data.is_active !== true || !["owner", "admin", "cashier"].includes(String(data.role).toLowerCase())) {
+        setError("Akun berhasil masuk, tetapi belum memiliki hak akses staf aktif. Hubungi Owner SANDIKALE."); setProfile(null); return;
       }
       setError(""); setProfile(data);
     }
