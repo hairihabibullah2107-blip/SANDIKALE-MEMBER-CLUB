@@ -432,3 +432,12 @@ body{background:#f4f2ed;color:var(--luxury-black)}
 .admin-upload-button:hover{background:#bd2028;border-color:#bd2028}
 .admin-upload-button input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .admin-upload-button:has(input:disabled){opacity:.6;cursor:wait}
+
+
+/* Reward product images: show the complete photo without cropping */
+.member-reward-photo{height:210px;padding:12px;background:#f4f2ed;box-sizing:border-box}
+.member-reward-photo img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.admin-reward-image-preview{display:grid;place-items:center;padding:6px;box-sizing:border-box}
+.admin-reward-image-preview img{width:100%;height:100%;object-fit:contain;object-position:center}
+.admin-reward-cell img{width:54px;height:46px;object-fit:contain;object-position:center;background:#f4f2ed;padding:2px;box-sizing:border-box}
+@media(max-width:640px){.member-reward-photo{height:190px;padding:10px}}
