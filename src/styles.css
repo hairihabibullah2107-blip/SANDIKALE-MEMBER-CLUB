@@ -391,3 +391,6 @@ body{background:#f4f2ed;color:var(--luxury-black)}
  .member-topbar .brand{display:flex}
  .member-topbar>span{font-size:8px}
 }
+
+.stamp-brand-symbol{display:grid;place-items:center;width:23px;height:23px;color:#bd2028}.stamp-brand-symbol svg{display:block;width:100%;height:100%}
+.stamp-slot.earned .stamp-brand-symbol{color:#f7f4ed}
