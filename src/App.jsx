@@ -1,209 +1,51 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { supabase } from "./supabase.js";
-
-const initialHistory = [
-  { id: "TRX-1024", date: "08 Nov 2026", detail: "Custom Kaos • 1 pcs", stamp: "+1 stamp", status: "Terverifikasi" },
-  { id: "TRX-1018", date: "02 Nov 2026", detail: "DTF A4 • 2 lembar", stamp: "+1 stamp", status: "Terverifikasi" },
-  { id: "TRX-1009", date: "27 Okt 2026", detail: "Custom Kaos • 2 pcs", stamp: "+1 stamp", status: "Terverifikasi" }
-];
-
-const rewards = [
-  { id: "logo", name: "Gratis DTF Logo", detail: "Gratis cetak DTF ukuran logo untuk pesanan berikutnya.", target: 6, type: "Hadiah member", mark: "01" },
-  { id: "discount", name: "Diskon Custom Kaos", detail: "Potongan harga untuk satu pesanan custom kaos.", target: 10, type: "Voucher diskon", mark: "02" },
-  { id: "voucher", name: "Voucher Member", detail: "Voucher spesial untuk transaksi pilihan.", target: 15, type: "Exclusive reward", mark: "03" }
-];
-
-function Icon({ name }) {
-  const paths = {
-    home: <><path d="m3 10 9-7 9 7" /><path d="M5 9v11h14V9M9 20v-6h6v6" /></>,
-    gift: <><rect x="3" y="8" width="18" height="13" rx="2" /><path d="M12 8v13M3 12h18M12 8H7.5a2.5 2.5 0 1 1 2.4-3.2L12 8Zm0 0h4.5a2.5 2.5 0 1 0-2.4-3.2L12 8Z" /></>,
-    history: <><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>,
-    user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
-    arrow: <><path d="M5 12h14M13 6l6 6-6 6" /></>,
-    chevron: <path d="m9 18 6-6-6-6" />,
-    qr: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><path d="M14 14h3v3h-3zM20 14v2M14 20h2M20 19v2M18 17h3" /></>,
-    check: <path d="m5 12 4 4L19 6" />,
-    close: <><path d="m6 6 12 12M18 6 6 18" /></>
-  };
-  return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+import React,{useEffect,useMemo,useState}from"react";import{supabase}from"./supabase.js";import{jsPDF}from"jspdf";import"./showroom.css";
+const WA="6282266412844",money=n=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(+n||0),slug=s=>String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const labels={customer_submitted:"Pesanan diterima",waiting_admin_confirmation:"Menunggu admin",waiting_design_review:"Pemeriksaan desain",waiting_customer_approval:"Menunggu persetujuan desain",revision_requested:"Perlu revisi",approved:"Disetujui",waiting_payment:"Menunggu pembayaran",partially_paid:"Dibayar sebagian",paid:"Lunas",in_production:"Dalam produksi",quality_control:"Quality control",ready:"Siap diambil/dikirim",completed:"Selesai",cancelled:"Dibatalkan"};
+const file64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=no;r.readAsDataURL(f)});
+function Brand(){return <a className="brand" href="/"><b>SANDIKALE</b><small>DESIGN & PRODUCTIONS</small></a>}function Btn(p){return <button className="btn" {...p}/>}
+export default function App(){
+const admin=location.pathname.startsWith("/admin")||new URLSearchParams(location.search).get("view")==="admin",trackParam=new URLSearchParams(location.search).get("track");
+const[products,sp]=useState([]),[categories,sc]=useState([]),[loading,sl]=useState(true),[selected,ss]=useState(null),[search,sq]=useState(""),[filter,sf]=useState("Semua"),[cart,sCart]=useState([]),[checkout,sCheckout]=useState(false),[customer,sCustomer]=useState({name:"",phone:"",organization:"",notes:""}),[design,sDesign]=useState(null),[placement,sPlacement]=useState("Depan - Tengah"),[method,sMethod]=useState("DTF"),[sizes,sSizes]=useState({M:1}),[busy,sBusy]=useState(false),[error,sError]=useState(""),[receipt,sReceipt]=useState(null),[session,sSession]=useState(null),[profile,sProfile]=useState(null),[credentials,sCredentials]=useState({email:"",password:""}),[tab,sTab]=useState("orders"),[adminProducts,sAdminProducts]=useState([]),[orders,sOrders]=useState([]),[edit,sEdit]=useState(null),[tracking,sTracking]=useState(trackParam||""),[trackData,sTrackData]=useState(null);
+async function loadCatalog(){sl(true);const[p,c]=await Promise.all([supabase.from("showroom_products").select("*,showroom_categories(name),showroom_product_images(*)").eq("is_published",true).order("created_at",{ascending:false}),supabase.from("showroom_categories").select("*").eq("is_active",true).order("sort_order")]);sp(p.data||[]);sc(c.data||[]);if(p.error)sError(p.error.message);sl(false)}
+useEffect(()=>{loadCatalog()},[]);
+useEffect(()=>{if(!admin)return;supabase.auth.getSession().then(({data})=>sSession(data.session));const{data:l}=supabase.auth.onAuthStateChange((_e,v)=>sSession(v));return()=>l.subscription.unsubscribe()},[admin]);
+useEffect(()=>{if(!session?.user?.id){sProfile(null);return}supabase.from("showroom_staff_profiles").select("*").eq("auth_user_id",session.user.id).eq("is_active",true).maybeSingle().then(({data})=>sProfile(data||null))},[session]);
+useEffect(()=>{if(profile){loadAdminProducts();loadOrders()}},[profile]);
+async function loadAdminProducts(){const{data}=await supabase.from("showroom_products").select("*,showroom_product_images(*)").order("created_at",{ascending:false});sAdminProducts(data||[])}
+async function loadOrders(){const{data}=await supabase.from("showroom_orders").select("*,showroom_customers(name,whatsapp),showroom_order_items(*)").order("created_at",{ascending:false}).limit(100);sOrders(data||[])}
+async function trackOrder(code){sTrackData(null);sError("");const{data,error}=await supabase.functions.invoke("showroom-public-api",{body:{action:"track_order",tracking_code:code}});if(error||data?.error){sError(data?.error||error?.message||"Pesanan tidak ditemukan.");return}sTrackData(data)}
+const shown=useMemo(()=>products.filter(p=>(filter==="Semua"||p.showroom_categories?.name===filter)&&p.name.toLowerCase().includes(search.toLowerCase())),[products,filter,search]),total=cart.reduce((a,p)=>a+(+p.base_price||0)*p.qty,0);
+function add(p){const config={...p,qty:Math.max(1,Object.values(sizes).reduce((a,b)=>a+(+b||0),0)),sizes:{...sizes},placement,printing_method:method};sCart(old=>old.some(x=>x.id===p.id)?old.map(x=>x.id===p.id?{...x,qty:x.qty+config.qty,sizes:Object.fromEntries([...new Set([...Object.keys(x.sizes||{}),...Object.keys(config.sizes)])].map(k=>[k,(+x.sizes?.[k]||0)+(+config.sizes?.[k]||0)])),placement,printing_method:method}:x):[...old,config]);sSizes({M:1});ss(null)}
+function spk(o){
+const d=new jsPDF({unit:"mm",format:"a4"});d.setLineWidth(.35);d.setDrawColor(20);d.rect(10,10,190,277);
+d.setFont("helvetica","bold");d.setFontSize(22);d.text("SANDIKALE",105,22,{align:"center"});d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("DESIGN & PRODUCTIONS  /  SURAT PERINTAH KERJA",105,28,{align:"center"});d.line(17,33,193,33);
+d.setFont("helvetica","bold");d.setFontSize(11);d.text("SURAT PERINTAH KERJA",17,42);d.setFontSize(8.5);
+const info=[["NO. SPK",o.spk_number],["NO. ORDER",o.order_number],["TANGGAL",new Date().toLocaleDateString("id-ID")],["PELANGGAN",customer.name||o.customer_name||"-"],["WHATSAPP",customer.phone||"-"],["STATUS","DRAFT / MENUNGGU KONFIRMASI"]];
+let y=50;info.forEach(([a,b])=>{d.setFont("helvetica","bold");d.text(a,18,y);d.setFont("helvetica","normal");d.text(String(b||"-").slice(0,48),57,y);y+=6.5});
+d.line(17,91,193,91);d.setFont("helvetica","bold");d.setFontSize(9);d.text("VISUAL PRODUK / AREA PENEMPATAN DESAIN",105,98,{align:"center"});
+function tee(x,y,label){d.setFillColor(32,32,32);d.setDrawColor(20);const shape=[[12,0],[22,6],[31,2],[43,15],[35,24],[30,20],[30,68],[12,68],[12,20],[7,24],[0,15],[9,2],[12,6]];d.lines(shape,x,y,[1,1],"F",true);d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(7);d.text(label,x+21.5,y+78,{align:"center"});d.setTextColor(20,20,20);d.setDrawColor(163,59,48);d.setLineWidth(.8);d.rect(x+17,y+29,9,9);d.setFontSize(5.5);d.setTextColor(163,59,48);d.text("AREA DESAIN",x+21.5,y+43,{align:"center"});d.setTextColor(20,20,20);d.setDrawColor(20);d.setLineWidth(.35)}
+tee(54,108,"DEPAN");tee(121,108,"BELAKANG");
+d.line(17,194,193,194);d.setFont("helvetica","bold");d.setFontSize(9);d.text("SPESIFIKASI PESANAN",18,202);
+d.setFont("helvetica","normal");d.setFontSize(8);let yy=211;
+const detail=(o.items||cart).map((it,i)=>(i+1)+". "+(it.product_name_snapshot||it.name)+" / "+(it.quantity||it.qty||1)+" PCS");
+detail.forEach(t=>{d.text(t.slice(0,95),18,yy);yy+=6});
+yy+=3;d.setFont("helvetica","bold");d.text("KETERANGAN SABLON",18,yy);d.text("CATATAN PRODUKSI",111,yy);yy+=7;d.setFont("helvetica","normal");
+d.text("Teknik: "+method,18,yy);d.text("Estimasi: menunggu konfirmasi admin",111,yy);yy+=6;d.text("Posisi: "+placement,18,yy);d.text("Artwork: "+(o.design_received?"File diterima":"Belum diunggah"),111,yy);yy+=6;
+d.text("Ukuran: "+Object.entries(sizes).filter(x=>x[1]>0).map(x=>x.join(":")).join(", "),18,yy);d.text("Jumlah: "+(o.total_quantity||cart.reduce((a,p)=>a+p.qty,0))+" PCS",111,yy);
+d.setFont("helvetica","bold");d.setFontSize(9);d.text("TOTAL ESTIMASI",18,254);d.text(money(o.total_amount||total),111,254);
+d.setFont("helvetica","normal");d.setFontSize(7);d.text("Dokumen DRAFT. Produksi hanya dimulai setelah spesifikasi, desain, harga, dan pembayaran dikonfirmasi admin.",18,266);
+d.text("Instagram: @_sandikale  |  WhatsApp: +62 822-6641-2844",105,278,{align:"center"});
+d.save((o.spk_number||"SPK-SANDIKALE")+".pdf")
 }
-
-function Brand({ compact = false }) {
-  return <div className={`brand ${compact ? "brand-compact" : ""}`}><span className="brand-mark"><svg className="brand-emblem" viewBox="0 0 1365 2048" aria-hidden="true" role="img"><path d="M465,0 L342,124 L558,341 L341,558 L124,342 L0,465 L558,1023 L404,1179 L527,1302 L682,1147 L900,1365 L682,1582 L341,1241 L0,1582 L124,1705 L341,1489 L558,1706 L342,1924 L465,2047 L682,1830 L899,2047 L1023,1923 L806,1706 L1023,1489 L1240,1705 L1364,1582 L806,1024 L961,868 L837,745 L682,900 L465,682 L683,465 L1024,805 L1364,465 L1240,342 L1023,558 L806,341 L1023,124 L899,0 L682,217 Z" fill="currentColor"/></svg></span><span className="brand-wordmark"><b>SANDIKALE</b><small>MEMBER CLUB</small></span></div>;
-}
-
-function MemberCard({ stamps, onShowQr }) {
-  return (
-    <section className="member-card">
-      <div className="card-glow" />
-      <div className="member-card-top"><Brand compact /><span className="member-chip">MEMBER</span></div>
-      <div className="card-middle"><span className="eyebrow light">DIGITAL MEMBERSHIP CARD</span><h2>Belanja lebih dekat.<br />Reward lebih berarti.</h2></div>
-      <div className="member-card-bottom">
-        <div><span className="eyebrow light">MEMBER NAME</span><strong>Ko Abee</strong><span className="member-number">SK-000001</span></div>
-        <button className="qr-button" onClick={onShowQr} aria-label="Tampilkan QR member"><Icon name="qr" /></button>
-      </div>
-      <div className="card-watermark">SK</div>
-    </section>
-  );
-}
-
-function StampPanel({ stamps, target }) {
-  return (
-    <section className="panel stamp-panel">
-      <div className="section-heading"><div><span className="eyebrow">YOUR COLLECTION</span><h3>Koleksi stamp</h3></div><span className="stamp-count">{stamps}<i> / {target}</i></span></div>
-      <p className="muted small-copy">Setiap transaksi valid membawa kamu lebih dekat ke reward berikutnya.</p>
-      <div className="stamp-grid" aria-label={`${stamps} dari ${target} stamp terkumpul`}>
-        {Array.from({ length: target }, (_, index) => <div className={`stamp-slot ${index < stamps ? "earned" : ""}`} key={index}>{index < stamps ? <span className="stamp-brand-symbol" aria-label="SANDIKALE"><svg viewBox="0 0 1365 2048" aria-hidden="true"><path d="M465,0 L342,124 L558,341 L341,558 L124,342 L0,465 L558,1023 L404,1179 L527,1302 L682,1147 L900,1365 L682,1582 L341,1241 L0,1582 L124,1705 L341,1489 L558,1706 L342,1924 L465,2047 L682,1830 L899,2047 L1023,1923 L806,1706 L1023,1489 L1240,1705 L1364,1582 L806,1024 L961,868 L837,745 L682,900 L465,682 L683,465 L1024,805 L1364,465 L1240,342 L1023,558 L806,341 L1023,124 L899,0 L682,217 Z" fill="currentColor"/></svg></span> : <small>{String(index + 1).padStart(2, "0")}</small>}</div>)}
-      </div>
-      <div className="progress-meta"><span>Progress reward</span><strong>{Math.round(stamps / target * 100)}%</strong></div>
-      <div className="progress-track"><span style={{ width: `${Math.min(100, stamps / target * 100)}%` }} /></div>
-      <div className="next-reward"><span className="reward-icon"><Icon name="gift" /></span><div><b>{stamps >= target ? "Reward berhasil dibuka" : `${target - stamps} stamp lagi menuju reward`}</b><small>Gratis DTF Logo</small></div><span className="next-arrow"><Icon name="chevron" /></span></div>
-    </section>
-  );
-}
-
-function RewardCard({ reward, stamps, onClaim }) {
-  const unlocked = stamps >= reward.target;
-  return <article className={`reward-card ${unlocked ? "unlocked" : ""}`}><div className="reward-card-top"><span className="reward-index">{reward.mark}</span><span className={`reward-state ${unlocked ? "ready" : ""}`}>{unlocked ? "TERBUKA" : `${reward.target} STAMP`}</span></div><div className="reward-art"><Icon name="gift" /></div><span className="eyebrow">{reward.type}</span><h3>{reward.name}</h3><p>{reward.detail}</p><button className={unlocked ? "button-dark" : "button-outline"} disabled={!unlocked} onClick={() => onClaim(reward)}>{unlocked ? "Klaim reward" : "Belum tersedia"} <Icon name="arrow" /></button></article>;
-}
-
-function Modal({ title, children, onClose }) {
-  return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><div className="modal" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}><div className="modal-head"><h3>{title}</h3><button className="icon-button" onClick={onClose} aria-label="Tutup"><Icon name="close" /></button></div>{children}</div></div>;
-}
-
-function PublicMemberCard({token}) {
- const [dashboard,setDashboard]=useState(null),[loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState(""),[claiming,setClaiming]=useState(""),[tab,setTab]=useState("home"),[showQr,setShowQr]=useState(false);
- const memberUrl=window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(token);
- const loadDashboard=async()=>{setLoading(true);setError("");const {data,error:rpcError}=await supabase.rpc("mc_get_member_dashboard",{p_token:token});if(rpcError){setError(rpcError.message||"Dashboard member belum dapat dimuat.");setDashboard(null);}else setDashboard(data);setLoading(false);};
- useEffect(()=>{loadDashboard();},[token]);
- async function claim(r){if(!window.confirm("Ajukan penukaran "+r.name+"? Permintaan menunggu verifikasi kasir SANDIKALE."))return;setClaiming(r.id);setNotice("");setError("");const {error:e}=await supabase.rpc("mc_member_claim_reward",{p_token:token,p_reward_id:r.id});setClaiming("");if(e){setError(e.message||"Permintaan reward gagal.");return;}setNotice("Permintaan reward berhasil dikirim. Tunggu verifikasi SANDIKALE.");await loadDashboard();}
- const date=v=>v?new Date(v).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"}):"—";
- const money=v=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(v||0));
- const m=dashboard?.member||{},stamps=Number(m.total_stamps||0),target=Math.max(1,Number(dashboard?.stamp_target||10)),pct=Math.min(100,Math.round(stamps/target*100));
- const tabs=[["home","⌂","Beranda"],["rewards","◇","Reward"],["history","↺","Riwayat"],["profile","○","Profil"]];
- const qr="https://api.qrserver.com/v1/create-qr-code/?size=320x320&data="+encodeURIComponent(memberUrl);
- return <main className="member-portal"><header className="member-topbar"><Brand/><span>AREA MEMBER　●</span></header>
- {loading?<div className="member-loading">Menyiapkan ruang member…</div>:error&&!dashboard?<section className="member-error"><h2>Dashboard belum dapat dibuka</h2><p>{error}</p><button onClick={loadDashboard}>Coba lagi</button></section>:dashboard&&<>
- <div className="member-layout"><aside className="member-sidebar"><div className="member-sidebar-brand"><Brand/><span>MEMBER EXPERIENCE</span><small>OFFICIAL SANDIKALE COMMUNITY</small></div><small className="member-menu-label">MEMBER MENU</small><nav>{tabs.map(([id,ico,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{ico}　{label}</button>)}</nav></aside>
- <section className="member-content"><div className="member-welcome-row"><div><small>{new Date().toLocaleDateString("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}).toUpperCase()}</small><h1>Halo, {m.full_name||"Member"}.</h1><p>Senang melihatmu kembali di SANDIKALE MEMBER CLUB.</p></div><span>● MEMBER AKTIF</span></div>
- {error&&<p className="member-alert error">{error}</p>}{notice&&<p className="member-alert success">{notice}</p>}
- {tab==="home"&&<><div className="member-home-grid"><section className="member-hero-card"><div className="member-hero-top"><Brand compact/><span>MEMBER</span></div><div><small>DIGITAL MEMBERSHIP CARD</small><h2>Belanja lebih dekat.<br/>Reward lebih berarti.</h2></div><div className="member-hero-bottom"><div><small>MEMBER NAME</small><b>{m.full_name}</b><small>{m.member_code}</small></div><button onClick={()=>setShowQr(true)}>▦<small>QR MEMBER</small></button></div></section><section className="member-thankyou"><small>A LITTLE THANK YOU</small><h2>Setiap karya,<br/>ada apresiasi.</h2><p>Kumpulkan stamp dari transaksi valid dan tukarkan dengan reward spesial dari SANDIKALE.</p><button onClick={()=>setTab("rewards")}>Jelajahi reward →</button><b>01</b></section></div>
- <div className="member-lower-grid"><section className="member-panel"><div className="member-section-heading"><div><small>YOUR COLLECTION</small><h2>Koleksi stamp</h2></div><strong>{stamps}<small> / {target}</small></strong></div><p>Setiap transaksi valid membawa kamu lebih dekat ke reward berikutnya.</p><div className="member-stamp-grid">{Array.from({length:target},(_,i)=><div key={i} className={i<stamps?"earned":""}>{i<stamps?"S":String(i+1).padStart(2,"0")}</div>)}</div><div className="member-progress-meta"><span>Progress reward</span><b>{pct}%</b></div><div className="member-progress"><i style={{width:pct+"%"}}/></div><button className="member-next-reward" onClick={()=>setTab("rewards")}>{target-stamps} stamp lagi menuju reward　›</button></section><section className="member-panel member-meta-panel"><div><small>MEMBER SINCE</small><b>{date(m.joined_at)}</b></div><div><small>MEMBER ID</small><b>{m.member_code}</b></div><div><small>TOTAL POIN</small><b>{m.total_points||0} poin</b></div><div><small>POIN TERSEDIA</small><b>{dashboard.available_points||0} poin</b></div></section></div></>}
- {tab==="rewards"&&<section className="member-section-view"><small>EXCLUSIVE FOR MEMBERS</small><h2>Reward pilihan</h2><div className="member-reward-grid">{(dashboard.rewards||[]).map(r=><article className="member-reward-card" key={r.id}>{r.image_url?<div className="member-reward-photo"><img src={r.image_url} alt={r.name} loading="lazy" onError={e=>{e.currentTarget.style.display="none";}}/></div>:<div className="member-reward-photo member-reward-photo-empty"><span>SANDIKALE</span><b>{r.name}</b></div>}<div className="member-reward-info"><small>SANDIKALE PRIVILEGE</small><h3>{r.name}</h3><p>{r.description||"Reward khusus member SANDIKALE."}</p><b>{r.points_cost} POIN</b><small>Stok: {r.stock===null?"Tersedia":r.stock}</small><button disabled={claiming===r.id||dashboard.available_points<r.points_cost||(r.stock!==null&&r.stock<1)} onClick={()=>claim(r)}>{claiming===r.id?"Mengirim…":dashboard.available_points<r.points_cost?"Poin belum cukup":"Ajukan reward"}</button></div></article>)}</div></section>}
- {tab==="history"&&<section className="member-section-view"><small>YOUR ACTIVITY</small><h2>Riwayat aktivitas</h2><section className="member-panel"><h3>Riwayat transaksi</h3>{dashboard.transactions?.length?dashboard.transactions.map((x,i)=><div className="member-history-row" key={x.invoice_number||i}><span><b>{x.invoice_number}</b><small>{date(x.transaction_date)}</small></span><span><b>{money(x.total)}</b><small>+{x.points_earned} poin</small></span></div>):<p>Belum ada transaksi tercatat.</p>}</section><section className="member-panel"><h3>Status penukaran reward</h3>{dashboard.claims?.length?dashboard.claims.map(x=><div className="member-history-row" key={x.id}><span><b>{x.reward_name}</b><small>{date(x.claimed_at)} • {x.points_spent} poin</small></span><b>{({pending:"Menunggu",approved:"Disetujui",fulfilled:"Selesai",cancelled:"Dibatalkan"})[x.status]||x.status}</b></div>):<p>Belum ada permintaan penukaran.</p>}</section></section>}
- {tab==="profile"&&<section className="member-section-view"><small>MEMBER IDENTITY</small><h2>Profil member</h2><section className="member-panel"><h3>{m.full_name}</h3><p>{m.member_code}</p><p>Member sejak {date(m.joined_at)}</p><p>Dusun Penangke, Desa Sesaot, Kec. Narmada, Kab. Lombok Barat, NTB</p><div className="member-social-links">
-<a className="member-social-link instagram" href="https://www.instagram.com/_sandikale/" target="_blank" rel="noreferrer" aria-label="Instagram SANDIKALE"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="2.4"/><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2.4"/><circle cx="17.7" cy="6.5" r="1.35" fill="currentColor"/></svg><span><small>INSTAGRAM</small><b>@_sandikale</b></span><i>↗</i></a>
-<a className="member-social-link whatsapp" href="https://wa.me/6282266412844" target="_blank" rel="noreferrer" aria-label="WhatsApp SANDIKALE"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 3.8A11.4 11.4 0 0 0 2.3 17.5L.8 23.2l5.9-1.5A11.4 11.4 0 0 0 20.2 3.8ZM12 20.3c-1.7 0-3.3-.5-4.7-1.4l-.3-.2-3.5.9.9-3.4-.2-.4A8.7 8.7 0 1 1 12 20.3Zm4.8-6.5c-.3-.2-1.7-.9-2-.9-.3-.1-.5-.2-.7.2-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.2-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6l-.9-2.1c-.2-.5-.5-.4-.7-.4h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.5s1.1 2.9 1.3 3.1c.2.2 2.2 3.4 5.4 4.7.8.3 1.4.5 1.9.6.8.2 1.5.2 2 .1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.1-1.4-.1-.2-.3-.3-.6-.5Z" fill="currentColor"/></svg><span><small>WHATSAPP</small><b>+62 822-6641-2844</b></span><i>↗</i></a>
-</div></section></section>}
- <footer className="member-footer">SANDIKALE MEMBER CLUB　•　CRAFTED WITH APPRECIATION</footer></section></div><nav className="member-mobile-nav">{tabs.map(([id,ico,label])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}>{ico}<small>{label}</small></button>)}</nav>
- {showQr&&<div className="member-qr-overlay" onClick={()=>setShowQr(false)}><section className="member-qr-modal" onClick={e=>e.stopPropagation()}><button onClick={()=>setShowQr(false)}>×</button><h2>{m.full_name}</h2><b>{m.member_code}</b><img src={qr} alt="QR member SANDIKALE"/><p>Tunjukkan QR ini kepada kasir setiap kali bertransaksi.</p></section></div>}
- </>}</main>;
-}
-
-function RegistrationPage() {
-  const [form,setForm]=useState({full_name:"",phone:"",email:""});
-  const [saving,setSaving]=useState(false);
-  const [error,setError]=useState("");
-  const [member,setMember]=useState(null);
-  const [copied,setCopied]=useState(false);
-  const memberUrl=member ? window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(member.public_token) : "";
-  async function submit(e){
-    e.preventDefault();setSaving(true);setError("");
-    const {data,error:rpcError}=await supabase.rpc("mc_register_member",{
-      p_full_name:form.full_name.trim(),p_phone:form.phone.trim(),p_email:form.email.trim()||null
-    });
-    setSaving(false);
-    if(rpcError){setError(rpcError.message||"Pendaftaran belum berhasil.");return;}
-    if(!data?.public_token){setError("Pendaftaran berhasil diproses, tetapi tautan dashboard tidak tersedia. Hubungi SANDIKALE.");return;}
-    window.location.replace(window.location.origin+import.meta.env.BASE_URL+"?token="+encodeURIComponent(data.public_token));
-  }
-  async function copyLink(){
-    try{await navigator.clipboard.writeText(memberUrl);setCopied(true);}catch{setError("Browser tidak mengizinkan salin otomatis. Salin tautan secara manual.");}
-  }
-  const field={width:"100%",padding:"13px 14px",border:"1px solid #deded7",borderRadius:3,fontSize:14,background:"#fff"};
-  return <main style={{minHeight:"100vh",background:"#f4f3ef",padding:"32px 18px",display:"grid",placeItems:"center",fontFamily:"'DM Sans',sans-serif"}}>
-    <section style={{width:"100%",maxWidth:460,background:"#fff",padding:28,border:"1px solid #e7e6df",boxShadow:"0 18px 50px #0000000a"}}>
-      <Brand/><div style={{marginTop:30,fontSize:10,letterSpacing:2,color:"#96968e",fontWeight:700}}>JOIN THE COMMUNITY</div>
-      {member ? <div style={{textAlign:"center",paddingTop:18}}>
-        <div style={{fontSize:30,fontWeight:800}}>Selamat bergabung.</div>
-        <p style={{color:"#777",lineHeight:1.6}}>Keanggotaan SANDIKALE berhasil dibuat.</p>
-        <div style={{background:"#191919",color:"#fff",padding:22,margin:"22px 0"}}>
-          <div style={{fontSize:10,letterSpacing:2,color:"#aaa"}}>MEMBER ID</div><h2 style={{margin:"8px 0"}}>{member.member_code}</h2>
-          <img alt="QR kartu member" style={{width:190,height:190,background:"#fff",padding:9,margin:"8px auto"}} src={"https://api.qrserver.com/v1/create-qr-code/?size=220x220&data="+encodeURIComponent(memberUrl)}/>
-          <div style={{fontSize:12,color:"#ddd"}}>{member.full_name}</div>
-        </div>
-        <button onClick={copyLink} style={{width:"100%",padding:14,background:"#191919",color:"#fff",border:0}}>{copied?"Link berhasil disalin":"Salin link kartu member"}</button>
-        <p style={{fontSize:12,color:"#888",lineHeight:1.6}}>Simpan tautan ini. Tunjukkan QR tersebut kepada kasir setiap kali bertransaksi agar stamp tercatat.</p>
-      </div> : <form onSubmit={submit} style={{display:"grid",gap:13,marginTop:22}}>
-        <h1 style={{fontSize:28,lineHeight:1.15,margin:"0 0 4px",letterSpacing:-1}}>Daftar Member Club</h1>
-        <p style={{fontSize:13,color:"#777",lineHeight:1.6,margin:"0 0 8px"}}>Gabung gratis dan kumpulkan stamp setiap transaksi yang memenuhi ketentuan SANDIKALE.</p>
-        <label style={{fontSize:12,fontWeight:600}}>Nama lengkap<input required minLength={2} autoComplete="name" style={{...field,display:"block",marginTop:7}} value={form.full_name} onChange={e=>setForm({...form,full_name:e.target.value})} placeholder="Nama sesuai identitas"/></label>
-        <label style={{fontSize:12,fontWeight:600}}>Nomor WhatsApp<input required type="tel" autoComplete="tel" style={{...field,display:"block",marginTop:7}} value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="08xxxxxxxxxx"/></label>
-        <label style={{fontSize:12,fontWeight:600}}>Email (opsional)<input type="email" autoComplete="email" style={{...field,display:"block",marginTop:7}} value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="email@contoh.com"/></label>
-        {error&&<p style={{color:"#a33",fontSize:12,background:"#fff1f0",padding:10}}>{error}</p>}
-        <button disabled={saving} style={{padding:15,background:"#191919",color:"#fff",border:0,fontWeight:700,marginTop:5}}>{saving?"Mendaftarkan…":"Daftar sebagai member"}</button>
-        <small style={{color:"#999",lineHeight:1.5}}>Dengan mendaftar, kamu menyetujui data nama dan nomor WhatsApp digunakan untuk administrasi keanggotaan SANDIKALE.</small>
-      </form>}
-    </section>
-  </main>;
-}
-
-export default function App() {
-  const params = new URLSearchParams(window.location.search);
-  const publicToken = params.get("token");
-  if (params.get("register") === "1" || window.location.pathname.replace(/\/$/,"") === "/daftar") return <RegistrationPage/>;
-  if (publicToken) return <PublicMemberCard token={publicToken}/>;
-  return <RegistrationPage/>;
-  const [tab, setTab] = useState("home");
-  const [stamps] = useState(6);
-  const [modal, setModal] = useState(null);
-  const [claimed, setClaimed] = useState([]);
-  const [name, setName] = useState("Ko Abee");
-  const [phone, setPhone] = useState("0822 6641 2844");
-  const [whatsapp, setWhatsapp] = useState(true);
-  const [saved, setSaved] = useState(false);
-  const [toast, setToast] = useState("");
-  const target = 10;
-  const availableRewards = useMemo(() => rewards.filter(r => !claimed.includes(r.id)), [claimed]);
-
-  const notify = (message) => { setToast(message); window.setTimeout(() => setToast(""), 2600); };
-  const claimReward = (reward) => { setModal({ type: "claim", reward }); };
-  const confirmClaim = () => {
-    const reward = modal.reward;
-    setClaimed(current => [...current, reward.id]);
-    setModal(null);
-    notify("Permintaan klaim dicatat pada demo ini.");
-  };
-
-  const navItems = [{ id: "home", label: "Home", icon: "home" }, { id: "rewards", label: "Reward", icon: "gift" }, { id: "history", label: "History", icon: "history" }, { id: "profile", label: "Profile", icon: "user" }];
-
-  return (
-    <div className="app-shell">
-      <header className="topbar"><Brand /><div className="topbar-right"><span className="online-dot" /> <span>MEMBER AREA</span><button className="avatar" onClick={() => setTab("profile")}>KA</button></div></header>
-      <main className="main-layout">
-        <aside className="sidebar"><div className="sidebar-label">MEMBER MENU</div>{navItems.map(item => <button key={item.id} className={`nav-link ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}><Icon name={item.icon} /><span>{item.label}</span>{tab === item.id && <i />}</button>)}<div className="sidebar-note"><span className="eyebrow">SANDIKALE</span><p>Terima kasih sudah menjadi bagian dari perjalanan kreatif kami.</p><span className="sidebar-version">MEMBER CLUB • V1.0</span></div></aside>
-        <div className="content-area">
-          <div className="welcome-row"><div><span className="eyebrow">TUESDAY, 10 NOVEMBER 2026</span><h1>{tab === "home" ? <>Halo, {name.split(" ")[0]}.</> : tab === "rewards" ? "Reward kamu." : tab === "history" ? "Riwayat transaksi." : "Profil member."}</h1><p className="muted">{tab === "home" ? "Senang melihatmu kembali di SANDIKALE MEMBER CLUB." : "Kelola aktivitas keanggotaan SANDIKALE kamu."}</p></div><div className="member-status"><span className="status-dot" /> ACTIVE MEMBER</div></div>
-
-          {tab === "home" && <>
-            <div className="home-grid"><div className="home-main"><MemberCard stamps={stamps} onShowQr={() => setModal({ type: "qr" })} /><StampPanel stamps={stamps} target={target} /></div><div className="home-side"><section className="welcome-card"><span className="eyebrow light">A LITTLE THANK YOU</span><h2>Setiap karya,<br />ada apresiasi.</h2><p>Kumpulkan stamp dari transaksi valid dan tukarkan dengan reward spesial dari SANDIKALE.</p><button onClick={() => setTab("rewards")}>Jelajahi reward <Icon name="arrow" /></button><div className="welcome-number">01</div></section><section className="quick-info"><span className="eyebrow">MEMBER SINCE</span><strong>Oktober 2026</strong><div className="quick-divider" /><span className="eyebrow">MEMBER ID</span><strong>SK-000001</strong></section></div></div>
-            <div className="section-heading lower-heading"><div><span className="eyebrow">MEMBER PRIVILEGES</span><h2>Reward pilihan</h2></div><button className="text-link" onClick={() => setTab("rewards")}>Lihat semua <Icon name="arrow" /></button></div>
-            <div className="reward-grid">{availableRewards.slice(0, 2).map(reward => <RewardCard key={reward.id} reward={reward} stamps={stamps} onClaim={claimReward} />)}</div>
-          </>}
-
-          {tab === "rewards" && <><div className="page-intro"><span className="eyebrow">YOUR BENEFITS</span><h2>Apresiasi untuk setiap transaksi.</h2><p className="muted">Reward terbuka otomatis setelah jumlah stamp memenuhi target yang ditentukan.</p></div><div className="reward-grid full-reward-grid">{availableRewards.map(reward => <RewardCard key={reward.id} reward={reward} stamps={stamps} onClaim={claimReward} />)}</div>{claimed.length > 0 && <p className="muted small-copy">Reward yang sudah diklaim: {claimed.length}. Data ini hanya tersimpan sementara di browser demo.</p>}</>}
-
-          {tab === "history" && <div className="panel history-panel"><div className="section-heading"><div><span className="eyebrow">TRANSACTION LOG</span><h3>Aktivitas member</h3></div><span className="history-total">03 RECORDS</span></div>{initialHistory.map(item => <div className="history-row" key={item.id}><div className="history-icon"><Icon name="check" /></div><div className="history-detail"><b>{item.detail}</b><span>{item.date} • {item.id}</span></div><div className="history-result"><b>{item.stamp}</b><span>{item.status}</span></div><Icon name="chevron" /></div>)}<div className="demo-notice">Riwayat di atas adalah data contoh untuk pratinjau UI, bukan transaksi asli.</div></div>}
-
-          {tab === "profile" && <div className="profile-grid"><section className="panel profile-panel"><span className="eyebrow">PERSONAL INFORMATION</span><h3>Informasi member</h3><label>Nama lengkap<input value={name} onChange={e => setName(e.target.value)} /></label><label>Nomor WhatsApp<input value={phone} onChange={e => setPhone(e.target.value)} /></label><label className="consent-row"><input type="checkbox" checked={whatsapp} onChange={e => setWhatsapp(e.target.checked)} /><span><b>Terima informasi melalui WhatsApp</b><small>Persetujuan komunikasi dapat diubah kapan saja. Pesan promosi dan notifikasi transaksi akan dikelola terpisah.</small></span></label><button className="button-dark save-button" onClick={() => { setSaved(true); notify("Perubahan tersimpan sementara di demo."); }}>Simpan perubahan <Icon name="arrow" /></button>{saved && <p className="saved-note">Perubahan tersimpan sementara pada sesi demo.</p>}</section><section className="panel profile-member"><div className="profile-avatar">KA</div><h3>{name || "Member SANDIKALE"}</h3><p className="muted">SK-000001</p><span className="member-state">ACTIVE MEMBER</span><div className="profile-stats"><div><b>{stamps}</b><small>Stamp</small></div><div><b>{claimed.length}</b><small>Reward diklaim</small></div></div></section></div>}
-          <footer className="footer"><Brand compact /><span>© 2026 SANDIKALE. Crafted with purpose.</span><span>MEMBER CLUB V1.0</span></footer>
-        </div>
-      </main>
-      <nav className="mobile-nav">{navItems.map(item => <button key={item.id} className={tab === item.id ? "active" : ""} onClick={() => setTab(item.id)}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
-      {modal?.type === "qr" && <Modal title="QR member" onClose={() => setModal(null)}><div className="qr-modal-content"><div className="fake-qr"><Icon name="qr" /></div><h3>SK-000001</h3><p className="muted">Tunjukkan kartu member ini kepada kasir SANDIKALE.</p><div className="demo-notice">QR ini hanya ilustrasi. QR member asli akan dibuat dengan token aman dari server setelah integrasi backend.</div></div></Modal>}
-      {modal?.type === "claim" && <Modal title="Konfirmasi reward" onClose={() => setModal(null)}><div className="claim-content"><div className="reward-art"><Icon name="gift" /></div><h3>{modal.reward.name}</h3><p className="muted">{modal.reward.detail}</p><div className="demo-notice">Pratinjau saja: proses klaim belum terhubung ke server dan belum menerbitkan kode penukaran.</div><button className="button-dark claim-confirm" onClick={confirmClaim}>Lanjutkan demo <Icon name="arrow" /></button></div></Modal>}
-      {toast && <div className="toast">{toast}</div>}
-      <div className="demo-ribbon">PREVIEW • SAMPLE DATA</div>
-    </div>
-  );
-}
+async function submitOrder(e){e.preventDefault();sBusy(true);sError("");const items=cart.map(p=>({product_id:p.id,quantity:p.qty,sizes:Object.entries(p.sizes||{}).filter(x=>+x[1]>0).map(([size,quantity])=>({size,quantity:+quantity})),color:"Custom",placement:p.placement||placement,printing_method:p.printing_method||method}));let design_base64=null;if(design)design_base64=await file64(design);const{data,error}=await supabase.functions.invoke("showroom-public-api",{body:{action:"create_order",customer,items,design_base64,design_name:design?.name}});sBusy(false);if(error||data?.error){sError(data?.error||error?.message||"Pesanan gagal.");return}sReceipt(data);sCheckout(false);sCart([]);window.open("https://wa.me/"+WA+"?text="+encodeURIComponent("Halo SANDIKALE, saya telah mengirim pesanan.\nOrder: "+data.order_number+"\nSPK: "+data.spk_number+"\nTracking: "+data.tracking_code+"\nMohon konfirmasi."),"_blank","noopener,noreferrer")}
+async function login(e){e.preventDefault();sBusy(true);const{error}=await supabase.auth.signInWithPassword(credentials);sBusy(false);if(error)sError(error.message)}
+async function saveProduct(e){e.preventDefault();const f=new FormData(e.currentTarget),name=String(f.get("name")||"").trim(),photo=f.get("photo"),payload={name,slug:slug(name),description:f.get("description"),base_price:+f.get("base_price"),model:f.get("model"),is_published:f.get("published")==="on",stock_mode:"made_to_order"};if(!name||payload.base_price<0){sError("Nama dan harga produk wajib valid.");return}let productId=edit?.id;if(productId){const{error}=await supabase.from("showroom_products").update(payload).eq("id",productId);if(error){sError(error.message);return}}else{const{data,error}=await supabase.from("showroom_products").insert(payload).select("id").single();if(error){sError(error.message);return}productId=data.id}if(photo instanceof File&&photo.size){if(!["image/jpeg","image/png","image/webp"].includes(photo.type)||photo.size>10*1024*1024){sError("Foto harus JPG, PNG, WEBP dan maksimal 10 MB.");return}const ext=photo.type==="image/png"?"png":photo.type==="image/webp"?"webp":"jpg",path=productId+"/"+crypto.randomUUID()+"."+ext;const{data:uploaded,error:uploadError}=await supabase.storage.from("showroom-product-images").upload(path,photo,{contentType:photo.type,upsert:false});if(uploadError){sError("Foto gagal diunggah: "+uploadError.message);return}await supabase.from("showroom_product_images").update({is_primary:false}).eq("product_id",productId);const{error:imageError}=await supabase.from("showroom_product_images").insert({product_id:productId,storage_path:uploaded.path,is_primary:true,sort_order:0,alt_text:name});if(imageError){sError("Data foto gagal disimpan: "+imageError.message);return}}sEdit(null);sError("");loadAdminProducts()}
+async function status(o,v){const{error}=await supabase.from("showroom_orders").update({status:v,updated_at:new Date().toISOString()}).eq("id",o.id);if(error)sError(error.message);else loadOrders()}
+async function verifyPayment(o){const raw=window.prompt("Masukkan nominal pembayaran yang sudah diterima (Rp):",String(o.total_amount||0));if(raw===null)return;const amount=Number(String(raw).replace(/[^0-9]/g,""));if(!Number.isFinite(amount)||amount<=0){sError("Nominal pembayaran tidak valid.");return}const{error:pe}=await supabase.from("showroom_payments").insert({order_id:o.id,amount,payment_method:"manual",payment_status:"verified",paid_at:new Date().toISOString(),notes:"Diverifikasi manual oleh admin."});if(pe){sError(pe.message);return}const next=amount>=Number(o.total_amount)?"paid":"partially_paid";const{error:oe}=await supabase.from("showroom_orders").update({payment_status:next,status:next==="paid"?"paid":o.status,updated_at:new Date().toISOString()}).eq("id",o.id);if(oe)sError(oe.message);else loadOrders()}
+if(admin)return <div className="admin"><header className="top"><Brand/><a href="/">Buka showroom ↗</a></header>{!session?<form className="login" onSubmit={login}><small>PRIVATE WORKSPACE</small><h1>Admin showroom</h1><label>Email<input type="email" required value={credentials.email} onChange={e=>sCredentials({...credentials,email:e.target.value})}/></label><label>Password<input type="password" required value={credentials.password} onChange={e=>sCredentials({...credentials,password:e.target.value})}/></label>{error&&<p className="error">{error}</p>}<Btn disabled={busy}>Masuk</Btn></form>:!profile?<div className="login">Akun belum memiliki profil showroom aktif. Hubungi Owner.</div>:<><div className="admin-head"><div><small>SANDIKALE / CONTROL ROOM</small><h1>Dashboard operasional</h1></div><Btn onClick={()=>supabase.auth.signOut()}>Keluar</Btn></div><nav className="tabs">{[["orders","Pesanan"],["products","Katalog"],["tracking","Tracking"],["settings","Pengaturan"]].map(([k,v])=><button className={tab===k?"active":""} onClick={()=>sTab(k)}>{v}</button>)}</nav><main className="admin-body">{tab==="orders"&&<><div className="stats"><article><small>Total order</small><b>{orders.length}</b></article><article><small>Aktif</small><b>{orders.filter(o=>!["completed","cancelled"].includes(o.status)).length}</b></article><article><small>Belum dibayar</small><b>{orders.filter(o=>o.payment_status==="unpaid").length}</b></article></div><div className="tablebox"><table><thead><tr><th>Order / SPK</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Pembayaran</th><th>Ubah</th></tr></thead><tbody>{orders.map(o=><tr><td><b>{o.order_number}</b><small>{o.spk_number}</small></td><td>{o.showroom_customers?.name}<small>{o.showroom_customers?.whatsapp}</small></td><td>{money(o.total_amount)}</td><td>{labels[o.status]||o.status}<small>{o.payment_status||"unpaid"}</small></td><td>{o.payment_status==="paid"?"LUNAS":<Btn onClick={()=>verifyPayment(o)}>Verifikasi bayar</Btn>}</td><td><select value={o.status} onChange={e=>status(o,e.target.value)}>{Object.entries(labels).map(([k,v])=><option value={k}>{v}</option>)}</select></td></tr>)}</tbody></table></div></>}{tab==="products"&&<><div className="toolbar"><h2>Kelola katalog</h2><Btn onClick={()=>sEdit({})}>+ Produk baru</Btn></div>{adminProducts.map(p=><div className="product-row"><div><b>{p.name}</b><small>{money(p.base_price)} · {p.is_published?"Terbit":"Draft"}</small></div><Btn onClick={()=>sEdit(p)}>Edit</Btn><Btn onClick={async()=>{await supabase.from("showroom_products").update({is_published:!p.is_published}).eq("id",p.id);loadAdminProducts()}}>{p.is_published?"Sembunyikan":"Terbitkan"}</Btn></div>)}{edit&&<form className="edit-form" onSubmit={saveProduct}><h3>{edit.id?"Edit produk":"Tambah produk"}</h3><label>Nama<input name="name" defaultValue={edit.name||""} required/></label><label>Harga<input name="base_price" type="number" min="0" defaultValue={edit.base_price||85000} required/></label><label>Model<input name="model" defaultValue={edit.model||"Oblong"}/></label><label>Deskripsi<textarea name="description" defaultValue={edit.description||""}/></label><label>Foto produk (JPG/PNG/WEBP, maks. 10 MB)<input name="photo" type="file" accept="image/jpeg,image/png,image/webp"/></label><label className="check"><input name="published" type="checkbox" defaultChecked={edit.is_published}/> Terbitkan</label><Btn>Simpan</Btn><Btn type="button" onClick={()=>sEdit(null)}>Batal</Btn></form>}</>}{tab==="tracking"&&<><h2>Tracking pesanan</h2><p>Pelanggan dapat melacak pesanan melalui kode tracking pada SPK.</p></>}{tab==="settings"&&<><h2>Pengaturan</h2><p>WhatsApp admin: +62 822-6641-2844</p><p>Pembayaran manual; admin memverifikasi pembayaran.</p><p>Database showroom memakai tabel terpisah di proyek Supabase Member Club.</p></>}</main></>}</div>;
+if(trackParam)return <div className="trackpage"><Brand/><section className="trackcard"><small>ORDER TRACKING</small><h1>Lacak pesanan</h1><form onSubmit={e=>{e.preventDefault();trackOrder(tracking)}}><input value={tracking} onChange={e=>sTracking(e.target.value)} placeholder="Kode tracking"/><Btn>Lacak</Btn></form>{trackData&&<><h2>{trackData.order_number}</h2><b>{labels[trackData.status]||trackData.status}</b><div className="timeline">{(trackData.history||[]).map(h=><p>{labels[h.new_status]||h.new_status}<small>{new Date(h.created_at).toLocaleString("id-ID")}</small></p>)}</div></>}{error&&<p className="error">{error}</p>}</section></div>;
+return <div className="site"><header className="top"><Brand/><nav><a href="#catalog">Katalog</a><a href="#custom">Custom</a><a href="/admin">Admin</a><a href="#track">Tracking</a></nav><a className="cartlink" href="#cart" onClick={e=>{e.preventDefault();sCheckout(true)}}>Pesanan ({cart.reduce((n,p)=>n+p.qty,0)})</a></header><section className="hero"><div><small>CUSTOM APPAREL / MADE FOR YOU</small><h1>Wear your<br/><i>own story.</i></h1><p>Kaos custom satuan, desain personal, dan produksi yang dikerjakan dengan detail.</p><a className="btn" href="#catalog">Jelajahi katalog ↗</a><div className="meta">DESIGN & PRODUCTIONS　　LOMBOK · INDONESIA</div></div><div className="hero-art"><div className="tee">S.</div><small>YOUR IDEA / OUR CRAFT</small></div></section><div className="intro"><span>01 / THE SHOWROOM</span><p>Pilih produk, tentukan spesifikasi, unggah desain, dan dapatkan SPK digital dalam satu alur.</p><span>SCROLL ↓</span></div><section id="catalog" className="catalog"><div className="heading"><div><small>CURATED COLLECTION</small><h2>Katalog pilihan<span>.</span></h2></div><input placeholder="Cari produk..." value={search} onChange={e=>sq(e.target.value)}/></div><div className="filters"><button className={filter==="Semua"?"active":""} onClick={()=>sf("Semua")}>Semua</button>{categories.map(c=><button className={filter===c.name?"active":""} onClick={()=>sf(c.name)}>{c.name}</button>)}</div>{loading?<p>Memuat katalog…</p>:shown.length===0?<div className="empty"><h3>Katalog sedang disiapkan.</h3><p>Admin akan segera menerbitkan produk.</p></div>:<div className="grid">{shown.map(p=><article><button className="photo" onClick={()=>ss(p)}>{p.showroom_product_images?.[0]?.storage_path?<img src={supabase.storage.from("showroom-product-images").getPublicUrl(p.showroom_product_images[0].storage_path).data.publicUrl}/>:<span className="tee">S.</span>}<small>LIHAT PRODUK ↗</small></button><div className="prodinfo"><div><h3>{p.name}</h3><small>{p.model||"CUSTOM APPAREL"}</small></div><b>{money(p.base_price)}</b></div><button className="linkbtn" onClick={()=>ss(p)}>Lihat detail ↗</button></article>)}</div>}</section><section id="custom" className="custom"><div><small>MADE TO MEASURE / MADE TO MEAN</small><h2>Ide kamu,<br/><i>jadi karya.</i></h2></div><p>Mulai dari satu kaos. Tentukan warna, ukuran, posisi cetak, dan unggah artwork milikmu. Tim SANDIKALE akan meninjau detail sebelum produksi.</p><Btn onClick={()=>ss({id:"custom",name:"Custom Kaos Satuan",base_price:85000,model:"Oblong"})}>Mulai custom ↗</Btn></section><section id="track" className="trackstrip"><div><small>ORDER STATUS</small><h2>Pesananmu, terpantau.</h2></div><form onSubmit={e=>{e.preventDefault();location.href="/?track="+encodeURIComponent(tracking)}}><input value={tracking} onChange={e=>sTracking(e.target.value)} placeholder="Kode tracking"/><Btn>Lacak</Btn></form></section><footer><Brand/><p>Custom apparel, crafted with intention.</p><div><a href="https://instagram.com/_sandikale" target="_blank" rel="noreferrer">@_sandikale</a><a href="https://wa.me/6282266412844">WhatsApp +62 822-6641-2844</a></div><small>© 2026 SANDIKALE DESIGN & PRODUCTIONS</small></footer>
+{selected&&<div className="shade" onMouseDown={()=>ss(null)}><section className="productmodal" onMouseDown={e=>e.stopPropagation()}><button className="x" onClick={()=>ss(null)}>×</button><div className="modalart"><span className="tee">S.</span></div><div className="modalinfo"><small>PRODUCT CONFIGURATION</small><h2>{selected.name}</h2><p>{selected.description||"Custom apparel SANDIKALE. Harga dapat berubah sesuai bahan, ukuran dan detail cetak."}</p><b>{money(selected.base_price)}</b><label>Teknik sablon<select value={method} onChange={e=>sMethod(e.target.value)}><option>DTF</option><option>Plastisol</option><option>Polyflex</option></select></label><label>Posisi desain<select value={placement} onChange={e=>sPlacement(e.target.value)}>{["Depan - Tengah","Depan - Dada kiri","Depan - Dada kanan","Belakang - Tengah","Lengan kiri","Lengan kanan"].map(x=><option>{x}</option>)}</select></label><label>Distribusi ukuran (jumlah)<div className="sizes">{["S","M","L","XL","XXL","XXXL"].map(x=><span>{x}<input type="number" min="0" value={sizes[x]||0} onChange={e=>sSizes({...sizes,[x]:+e.target.value})}/></span>)}</div></label><label>Unggah artwork<input type="file" accept="image/png,image/jpeg,application/pdf" onChange={e=>sDesign(e.target.files?.[0]||null)}/></label>{design&&<small>{design.name}</small>}<Btn onClick={()=>add(selected)}>Tambahkan ke pesanan</Btn></div></section></div>}
+{checkout&&<div className="shade"><form className="checkout" onSubmit={submitOrder}><button type="button" className="x" onClick={()=>sCheckout(false)}>×</button><small>CHECKOUT / ORDER REQUEST</small><h2>Lengkapi pesanan.</h2>{cart.map(p=><p>{p.name} × {p.qty} — {money(p.base_price*p.qty)}</p>)}<h3>Total estimasi {money(total)}</h3><label>Nama lengkap<input required value={customer.name} onChange={e=>sCustomer({...customer,name:e.target.value})}/></label><label>Nomor WhatsApp<input required value={customer.phone} onChange={e=>sCustomer({...customer,phone:e.target.value})} placeholder="08xxxxxxxxxx"/></label><label>Brand/komunitas<input value={customer.organization} onChange={e=>sCustomer({...customer,organization:e.target.value})}/></label><label>Catatan<textarea value={customer.notes} onChange={e=>sCustomer({...customer,notes:e.target.value})}/></label><p className="muted">Pembayaran manual setelah konfirmasi admin. SPK yang diunduh berstatus draft.</p>{error&&<p className="error">{error}</p>}<Btn disabled={busy}>{busy?"Memproses…":"Buat SPK & lanjut WhatsApp"}</Btn></form></div>}
+{receipt&&<div className="shade"><section className="receipt"><small>ORDER CREATED</small><h2>Pesanan tercatat.</h2><p>Order: <b>{receipt.order_number}</b></p><p>SPK: <b>{receipt.spk_number}</b></p><p>Tracking: <b>{receipt.tracking_code}</b></p><Btn onClick={()=>spk(receipt)}>Download SPK PDF</Btn><Btn onClick={()=>window.open("https://wa.me/"+WA+"?text="+encodeURIComponent("Halo SANDIKALE, order "+receipt.order_number+" / SPK "+receipt.spk_number),"_blank")}>WhatsApp Admin</Btn><button className="linkbtn" onClick={()=>sReceipt(null)}>Tutup</button></section></div>}
+</div>}
