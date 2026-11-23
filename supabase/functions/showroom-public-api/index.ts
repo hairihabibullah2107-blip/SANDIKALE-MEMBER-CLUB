@@ -21,6 +21,21 @@ Deno.serve(async(req:Request)=>{
    const{data:history}=await db.from("showroom_order_status_history").select("new_status,created_at,notes").eq("order_id",order.id).order("created_at",{ascending:true});
    return json({...order,history:history||[]});
   }
+  if(body.action==="save_spk"){
+   const code=String(body.tracking_code||"").trim(),encoded=String(body.pdf_base64||"");
+   if(code.length<20||code.length>100||encoded.length>9000000)return json({error:"Data SPK tidak valid atau terlalu besar."},400);
+   const{data:order,error:orderError}=await db.from("showroom_orders").select("id,spk_number").eq("access_token_hash",await sha(code)).maybeSingle();
+   if(orderError||!order)return json({error:"Pesanan tidak ditemukan."},404);
+   const raw=atob(encoded),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+   if(new TextDecoder().decode(bytes.slice(0,5))!=="%PDF-")return json({error:"Dokumen bukan PDF yang valid."},415);
+   const{count}=await db.from("showroom_spk_documents").select("id",{count:"exact",head:true}).eq("order_id",order.id).eq("document_type","customer_draft");
+   const revision=(count||0)+1,path="orders/"+order.order_number+"/"+order.spk_number+"-draft-r"+revision+".pdf";
+   const{error:uploadError}=await db.storage.from("showroom-spk-documents").upload(path,bytes,{contentType:"application/pdf",upsert:false});
+   if(uploadError)throw uploadError;
+   const{error:docError}=await db.from("showroom_spk_documents").insert({order_id:order.id,spk_number:order.spk_number,document_type:"customer_draft",revision_number:revision,storage_path:path,document_status:"active"});
+   if(docError)throw docError;
+   return json({saved:true,revision});
+  }
   if(body.action!=="create_order")return json({error:"Aksi tidak dikenal."},400);
   const c=body.customer||{},items=Array.isArray(body.items)?body.items:[],name=String(c.name||"").trim(),phone=String(c.phone||"").replace(/[^0-9+]/g,"");
   if(name.length<2||name.length>120||phone.length<9||phone.length>18||items.length<1||items.length>10)return json({error:"Nama, WhatsApp, atau daftar produk tidak valid."},400);
