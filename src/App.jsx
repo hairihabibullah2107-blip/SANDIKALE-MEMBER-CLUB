@@ -31,7 +31,7 @@ const detail=(o.items||cart).map((it,i)=>(i+1)+". "+(it.product_name_snapshot||i
 detail.forEach(t=>{d.text(t.slice(0,95),18,yy);yy+=6});
 yy+=3;d.setFont("helvetica","bold");d.text("KETERANGAN SABLON",18,yy);d.text("CATATAN PRODUKSI",111,yy);yy+=7;d.setFont("helvetica","normal");
 d.text("Teknik: "+method,18,yy);d.text("Estimasi: menunggu konfirmasi admin",111,yy);yy+=6;d.text("Posisi: "+placement,18,yy);d.text("Artwork: "+(o.design_received?"File diterima":"Belum diunggah"),111,yy);yy+=6;
-d.text("Ukuran: "+Object.entries(sizes).filter(x=>x[1]>0).map(x=>x.join(":")).join(", "),18,yy);d.text("Jumlah: "+(o.total_quantity||cart.reduce((a,p)=>a+p.qty,0))+" PCS",111,yy);
+const sizeSummary=(o.items||[]).flatMap(it=>(it.sizes||[]).map(s=>s.size+":"+s.quantity)).join(", ");d.text("Ukuran: "+(sizeSummary||"-"),18,yy);d.text("Jumlah: "+(o.total_quantity||cart.reduce((a,p)=>a+p.qty,0))+" PCS",111,yy);
 d.setFont("helvetica","bold");d.setFontSize(9);d.text("TOTAL ESTIMASI",18,254);d.text(money(o.total_amount||total),111,254);
 d.setFont("helvetica","normal");d.setFontSize(7);d.text("Dokumen DRAFT. Produksi hanya dimulai setelah spesifikasi, desain, harga, dan pembayaran dikonfirmasi admin.",18,266);
 d.text("Instagram: @_sandikale  |  WhatsApp: +62 822-6641-2844",105,278,{align:"center"});
