@@ -19,7 +19,24 @@ Deno.serve(async(req:Request)=>{
    const{data:order,error}=await db.from("showroom_orders").select("id,order_number,spk_number,status,created_at").eq("access_token_hash",await sha(code)).maybeSingle();
    if(error||!order)return json({error:"Pesanan tidak ditemukan. Periksa kembali kode tracking."},404);
    const{data:history}=await db.from("showroom_order_status_history").select("new_status,created_at,notes").eq("order_id",order.id).order("created_at",{ascending:true});
-   return json({...order,history:history||[]});
+   const{data:items}=await db.from("showroom_order_items").select("id,product_name_snapshot,showroom_order_designs(id,approval_status,design_version,original_storage_path,design_configuration)").eq("order_id",order.id);const designs=[];for(const item of items||[]){for(const d of item.showroom_order_designs||[]){let preview_url=null;if(d.original_storage_path){const{data:signed}=await db.storage.from("showroom-customer-designs").createSignedUrl(d.original_storage_path,600);preview_url=signed?.signedUrl||null}designs.push({id:d.id,product_name:item.product_name_snapshot,approval_status:d.approval_status,design_version:d.design_version,design_configuration:d.design_configuration,preview_url})}}return json({...order,history:history||[],designs});
+  }
+  if(body.action==="design_decision"){
+   const code=String(body.tracking_code||"").trim(),designId=String(body.design_id||""),decision=String(body.decision||""),notes=String(body.notes||"").slice(0,1000);
+   if(!["approved","revision_requested"].includes(decision))return json({error:"Keputusan desain tidak valid."},400);
+   const{data:order,error:orderError}=await db.from("showroom_orders").select("id,status").eq("access_token_hash",await sha(code)).maybeSingle();
+   if(orderError||!order)return json({error:"Pesanan tidak ditemukan."},404);
+   if(order.status!=="waiting_customer_approval")return json({error:"Persetujuan desain belum dibuka oleh admin."},409);
+   const{data:design,error:designError}=await db.from("showroom_order_designs").select("id,design_version,showroom_order_items!inner(order_id)").eq("id",designId).eq("showroom_order_items.order_id",order.id).maybeSingle();
+   if(designError||!design)return json({error:"Desain tidak ditemukan pada pesanan ini."},404);
+   const now=new Date().toISOString(),{error:updateError}=await db.from("showroom_order_designs").update({approval_status:decision}).eq("id",design.id);
+   if(updateError)throw updateError;
+   const{error:approvalError}=await db.from("showroom_design_approvals").upsert({order_id:order.id,order_design_id:design.id,revision_number:design.design_version,approval_status:decision,approved_by_customer:decision==="approved",approved_at:decision==="approved"?now:null,notes}, {onConflict:"order_design_id,revision_number"});
+   if(approvalError)throw approvalError;
+   const{data:allDesigns}=await db.from("showroom_order_designs").select("approval_status,showroom_order_items!inner(order_id)").eq("showroom_order_items.order_id",order.id);
+   const nextStatus=decision==="revision_requested"?"revision_requested":(allDesigns||[]).every(d=>d.approval_status==="approved")?"approved":"waiting_customer_approval";
+   if(nextStatus!==order.status){const{error:statusError}=await db.from("showroom_orders").update({status:nextStatus,updated_at:now}).eq("id",order.id);if(statusError)throw statusError;}
+   return json({success:true,status:nextStatus});
   }
   if(body.action==="save_spk"){
    const code=String(body.tracking_code||"").trim(),encoded=String(body.pdf_base64||"");
