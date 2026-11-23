@@ -9,6 +9,11 @@ Deno.serve(async(req:Request)=>{
  if(req.method!=="POST")return json({error:"Method not allowed"},405);
  try{
   const body=await req.json(),db=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const ip=req.headers.get("x-nf-client-connection-ip")||req.headers.get("cf-connecting-ip")||req.headers.get("x-forwarded-for")?.split(",")[0]||"unknown";
+  const limit=body.action==="create_order"?3:20;
+  const {data:allowed,error:rateError}=await db.rpc("showroom_take_rate_limit",{p_ip_hash:await sha(ip),p_max_hits:limit});
+  if(rateError)throw rateError;
+  if(!allowed)return json({error:"Terlalu banyak permintaan. Silakan tunggu beberapa menit lalu coba kembali."},429);
   if(body.action==="track_order"){
    const code=String(body.tracking_code||"").trim();if(code.length<20||code.length>100)return json({error:"Kode tracking tidak valid."},400);
    const{data:order,error}=await db.from("showroom_orders").select("id,order_number,spk_number,status,created_at").eq("access_token_hash",await sha(code)).maybeSingle();
