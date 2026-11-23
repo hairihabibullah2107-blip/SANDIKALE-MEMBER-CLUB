@@ -46,7 +46,8 @@ Konfigurasi publik Supabase sudah memiliki fallback pada `src/supabase.js`. Jang
 
 ## Fitur
 
-- Katalog produk dikelola melalui dashboard admin, tanpa mengedit JSON.
+- Katalog produk dikelola melalui dashboard admin, tanpa mengedit JSON. Produk hanya dapat diterbitkan setelah admin mengunggah foto produk utama.
+- Akses admin tidak ditampilkan di navigasi publik; pintu masuk berupa ikon gembok kecil di footer dan tetap dilindungi Supabase Auth serta profil staf aktif.
 - Form konfigurasi ukuran, posisi cetak, teknik sablon, dan unggah artwork.
 - Pratinjau artwork pada kaos untuk posisi cetak yang dipilih.
 - Checkout pesanan dengan pembayaran manual setelah konfirmasi admin.
