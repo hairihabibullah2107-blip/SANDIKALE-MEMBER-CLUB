@@ -3,3 +3,5 @@
 
 /* Live artwork placement preview */
 .preview-tee{position:relative;overflow:hidden}.artwork-overlay{position:absolute;width:34%;height:28%;object-fit:contain;filter:none;left:33%;top:35%;mix-blend-mode:normal;pointer-events:none}.modalart{padding:30px}.preview-tee{flex:0 0 auto}
+
+.artwork-overlay.placement-depan-dada-kiri{left:28%;top:24%;width:20%;height:18%}.artwork-overlay.placement-depan-dada-kanan{left:52%;top:24%;width:20%;height:18%}.artwork-overlay.placement-depan-tengah{left:33%;top:36%;width:34%;height:28%}.artwork-overlay.placement-belakang-tengah{left:33%;top:36%;width:34%;height:28%}.artwork-overlay.placement-lengan-kiri,.artwork-overlay.placement-lengan-kanan{left:15%;top:22%;width:20%;height:18%}
