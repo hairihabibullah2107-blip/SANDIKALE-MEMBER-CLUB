@@ -24,7 +24,7 @@ Deno.serve(async(req:Request)=>{
   if(body.action==="save_spk"){
    const code=String(body.tracking_code||"").trim(),encoded=String(body.pdf_base64||"");
    if(code.length<20||code.length>100||encoded.length>9000000)return json({error:"Data SPK tidak valid atau terlalu besar."},400);
-   const{data:order,error:orderError}=await db.from("showroom_orders").select("id,spk_number").eq("access_token_hash",await sha(code)).maybeSingle();
+   const{data:order,error:orderError}=await db.from("showroom_orders").select("id,spk_number,order_number").eq("access_token_hash",await sha(code)).maybeSingle();
    if(orderError||!order)return json({error:"Pesanan tidak ditemukan."},404);
    const raw=atob(encoded),bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
    if(new TextDecoder().decode(bytes.slice(0,5))!=="%PDF-")return json({error:"Dokumen bukan PDF yang valid."},415);
