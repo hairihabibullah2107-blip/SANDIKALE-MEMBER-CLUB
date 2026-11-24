@@ -50,3 +50,66 @@ footer{position:relative;grid-template-columns:1fr 1fr;padding:55px 9vw 40px;bac
 @media(max-width:760px){.top{height:68px}.top nav{display:none}.hero{padding:52px 22px 42px;min-height:0}.hero h1{font-size:70px}.hero-art{height:340px}.catalog{padding:64px 22px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 13px}.photo{aspect-ratio:3/4}.prodinfo h3{font-size:14px}.prodinfo{flex-direction:column;gap:6px}.custom{margin:0 18px 55px;padding:34px 25px}.custom h2{font-size:52px}.trackstrip{padding:42px 22px}footer{padding:42px 22px 55px;grid-template-columns:1fr;gap:18px}footer>div{justify-content:flex-start}footer>small{margin-top:10px}.modalart{min-height:260px}.modal-product-image{max-height:280px}.modalinfo{padding:25px}.modalinfo h2{font-size:30px}}
 
 .admin-product-thumb{width:64px;height:76px;object-fit:cover;background:#e8e7e1;display:block}.empty-thumb{font-size:7px!important;letter-spacing:.08em!important;display:grid;place-items:center}.product-row{justify-content:flex-start}.product-row>div{flex:1}.hero-art:after{content:none}
+
+
+/* Customer-first journey: clear hierarchy, helpful prompts, less rigid layout */
+.hero{min-height:610px;grid-template-columns:1.02fr .98fr;align-items:center}
+.hero h1{max-width:700px;font-size:clamp(62px,7.4vw,104px);line-height:.96;letter-spacing:-.075em}
+.hero p{max-width:470px;font-size:15px;line-height:1.95;color:#62615b}
+.hero-secondary{display:inline-block;margin-left:18px;font-size:11px;color:#666;text-decoration:underline;text-underline-offset:5px}
+.hero-art{border-radius:3px}
+.howto{padding:88px 9vw 92px;background:#eeede7;display:grid;grid-template-columns:.8fr 1.2fr;column-gap:8vw;row-gap:30px}
+.howto-heading>small{font-size:9px;letter-spacing:.22em;color:#8b8980;font-weight:700}
+.howto-heading h2{font:800 clamp(38px,4.5vw,58px)/1.04 Manrope;letter-spacing:-.065em;margin:17px 0}
+.howto-heading h2 i{font-family:Georgia,serif;font-weight:400}
+.howto-heading>p{font-size:13px;line-height:1.8;color:#77766e;max-width:320px}
+.howto-steps{display:grid;gap:0}
+.howto-steps article{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:21px 0;border-bottom:1px solid #d5d3ca}
+.howto-steps article:first-child{border-top:1px solid #d5d3ca}
+.howto-steps article>span{font:700 12px Manrope;color:#a33b30;padding-top:3px}
+.howto-steps b{font:700 17px Manrope;letter-spacing:-.02em}
+.howto-steps p{font-size:12px;line-height:1.8;color:#737169;margin:7px 0 0;max-width:530px}
+.howto-start{grid-column:2;justify-self:start;display:flex;gap:22px;align-items:center;padding:13px 0;border-bottom:1px solid #171715;font-size:11px;font-weight:700;letter-spacing:.06em}
+.howto-start b{font-size:18px;font-weight:400}
+.catalog{scroll-margin-top:80px}
+.catalog .heading{margin-bottom:24px}
+.grid article{display:flex;flex-direction:column;align-items:stretch}
+.grid article>.linkbtn{align-self:flex-start}
+.product-choose{margin-top:4px;padding:11px 0;border-bottom:1px solid #171715;font-weight:700;display:flex;gap:20px;align-items:center}
+.product-choose b{font-size:16px;font-weight:400}
+.product-choose:hover{color:#a33b30;border-color:#a33b30}
+.photo{border-radius:2px}
+.prodinfo{min-height:75px}
+.field-guide{background:#eeede7;border-left:2px solid #a33b30;padding:12px 14px!important;color:#666!important;font-size:11px!important;line-height:1.7!important}
+.modalinfo>label{gap:9px;font-size:10px;color:#292823}
+.modalinfo>label>span,.checkout label>span{font-size:9px;font-weight:700;letter-spacing:.12em;color:#77766e}
+.field-hint{font-size:10px!important;color:#8a8981!important;line-height:1.6}
+.modal-next{display:grid;gap:10px;margin-top:8px}
+.modal-next>small{font-size:10px;color:#888}
+.modal-next .btn{width:100%;padding:16px}
+.checkout-note{background:#eeede7;padding:15px 18px;margin:8px 0}
+.checkout-note b{font-size:11px}
+.checkout-note ol{margin:9px 0 0;padding-left:18px;font-size:10px;line-height:1.9;color:#666}
+.checkout .btn{width:100%;padding:17px}
+.checkout>p{font-size:11px;line-height:1.7}
+.empty{max-width:760px;margin:30px auto;border:1px solid #dddcd4}
+.empty p{max-width:470px;margin:10px auto 22px;font-size:12px;line-height:1.8;color:#777}
+.admin .edit-form{max-width:650px}
+.admin .edit-form>label{font-size:10px;line-height:1.6}
+.admin .edit-form>label small{color:#888;font-size:10px}
+.admin .edit-form input[type=file]{background:#f6f5f0;padding:13px}
+.admin .edit-form>h3{font:700 22px Manrope}
+@media(max-width:760px){
+ .hero{grid-template-columns:1fr;min-height:0;padding:48px 22px 40px;gap:30px}
+ .hero h1{font-size:clamp(60px,16vw,78px)}
+ .hero-secondary{display:block;margin:18px 0 0}
+ .hero-art{height:340px}
+ .howto{padding:58px 22px 60px;grid-template-columns:1fr;gap:20px}
+ .howto-heading h2{font-size:43px}
+ .howto-steps article{grid-template-columns:38px 1fr;gap:12px;padding:18px 0}
+ .howto-steps b{font-size:15px}
+ .howto-start{grid-column:1}
+ .catalog{scroll-margin-top:66px}
+ .modalinfo>label{font-size:10px}
+ .checkout-note{padding:13px}
+}
