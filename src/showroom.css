@@ -735,3 +735,51 @@ footer>small{grid-column:1/-1}
 .streetwear-site .sort-control select:focus{outline:1px solid var(--sw-orange);border-color:var(--sw-orange)}
 .streetwear-site .new-tag{position:absolute;top:10px;left:10px;background:var(--sw-orange);color:#090909;padding:6px 8px;font-size:8px;letter-spacing:.1em;z-index:2}
 @media(max-width:640px){.streetwear-site .region-chip{display:none}.streetwear-site .catalog-tools{width:100%;min-width:0;flex-direction:column;align-items:stretch}.streetwear-site .catalog-tools>input{width:100%;max-width:none}.streetwear-site .sort-control{justify-content:space-between}.streetwear-site .sort-control select{flex:1}}
+
+
+/* Premium product detail — editorial gallery and product information */
+.detail-shade{z-index:24;padding:24px}
+.product-detail-panel{position:relative;width:min(1120px,100%);max-height:94vh;overflow:auto;background:#f8f7f3;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);box-shadow:0 28px 90px #0004}
+.detail-gallery{padding:34px;background:#e9e8e1;display:flex;flex-direction:column;gap:12px;min-width:0}
+.detail-main-image{height:clamp(360px,65vh,680px);background:#deddd5;display:grid;place-items:center;overflow:hidden}
+.detail-main-image img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.detail-no-image{font:800 24px Manrope;letter-spacing:.15em;color:#777}
+.detail-thumbnails{display:flex;gap:9px;overflow:auto}
+.detail-thumbnails button{width:76px;height:86px;flex:0 0 auto;border:1px solid transparent;padding:3px;background:#f8f7f3;cursor:pointer}
+.detail-thumbnails button.active{border-color:#171715}
+.detail-thumbnails img{width:100%;height:100%;object-fit:cover}
+.detail-copy{padding:52px 48px 40px;display:flex;flex-direction:column;align-items:stretch;gap:13px}
+.detail-eyebrow,.detail-related>small{font-size:9px;letter-spacing:.2em;color:#89877f;font-weight:700}
+.detail-category{font-size:9px;letter-spacing:.16em;color:#8a8880;margin:18px 0 0}
+.detail-copy h2{font:800 clamp(32px,4vw,48px)/1.02 Manrope;letter-spacing:-.065em;margin:0}
+.detail-price{font:700 18px Manrope}
+.detail-description{font-size:13px;line-height:1.85;color:#77766f;margin:2px 0 12px}
+.detail-specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:18px 0;border-block:1px solid #deddd6}
+.detail-specs div{display:flex;flex-direction:column;gap:7px}
+.detail-specs small,.detail-option>small{font-size:8px;letter-spacing:.16em;color:#8a8880;font-weight:700}
+.detail-specs b{font-size:10px;line-height:1.5}
+.detail-option{display:grid;gap:11px;margin-top:7px}
+.detail-color-list,.detail-size-list{display:flex;flex-wrap:wrap;gap:7px}
+.detail-color-list span{border:1px solid #d7d5cc;background:#fff;padding:8px 12px;font-size:10px}
+.detail-size-list button{width:42px;height:42px;border:1px solid #d3d1c8;background:transparent;font-size:10px;cursor:pointer}
+.detail-size-list button.active{background:#171715;color:white;border-color:#171715}
+.detail-size-note{font-size:10px;color:#8a8880;margin:0}
+.detail-actions{display:grid;gap:10px;margin-top:12px}
+.detail-custom-button{width:100%;display:flex;justify-content:space-between;align-items:center;background:#171715;color:white;border:0;padding:18px 20px;font-size:10px;letter-spacing:.14em;cursor:pointer}
+.detail-custom-button:hover{background:#a33b30}
+.detail-actions>small{font-size:9px;line-height:1.6;color:#89877f}
+.detail-related{border-top:1px solid #deddd6;padding-top:18px;margin-top:10px}
+.detail-related>div{display:grid;gap:0;margin-top:8px}
+.detail-related button{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border:0;border-bottom:1px solid #e4e2dc;background:transparent;text-align:left;font-size:10px;cursor:pointer}
+.detail-related button b{white-space:nowrap}
+@media(max-width:760px){
+.detail-shade{padding:8px;align-items:start}
+.product-detail-panel{grid-template-columns:1fr;max-height:calc(100vh - 16px)}
+.detail-gallery{padding:16px}
+.detail-main-image{height:48vh;min-height:280px}
+.detail-thumbnails button{width:62px;height:70px}
+.detail-copy{padding:28px 22px 26px}
+.detail-copy h2{font-size:34px}
+.detail-specs{gap:7px}
+.detail-specs b{font-size:9px}
+}
