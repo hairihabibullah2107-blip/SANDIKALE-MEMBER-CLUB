@@ -17,25 +17,48 @@ async function trackOrder(code){sTrackData(null);sError("");const{data,error}=aw
 const shown=useMemo(()=>products.filter(p=>(filter==="Semua"||p.showroom_categories?.name===filter)&&p.name.toLowerCase().includes(search.toLowerCase())),[products,filter,search]),total=cart.reduce((a,p)=>a+(+p.base_price||0)*p.qty,0);
 function add(p){const selectedQty=Object.values(sizes).reduce((a,b)=>a+(+b||0),0);if(selectedQty<1){sError("Pilih minimal satu ukuran dengan jumlah lebih dari nol.");return}const config={...p,qty:selectedQty,sizes:{...sizes},placement,printing_method:method};sCart(old=>old.some(x=>x.id===p.id)?old.map(x=>x.id===p.id?{...x,qty:x.qty+config.qty,sizes:Object.fromEntries([...new Set([...Object.keys(x.sizes||{}),...Object.keys(config.sizes)])].map(k=>[k,(+x.sizes?.[k]||0)+(+config.sizes?.[k]||0)])),placement,printing_method:method}:x):[...old,config]);sSizes({M:1});ss(null)}
 async function spk(o){
-const d=new jsPDF({unit:"mm",format:"a4"});d.setLineWidth(.35);d.setDrawColor(20);d.rect(10,10,190,277);
-d.setFont("helvetica","bold");d.setFontSize(22);d.text("SANDIKALE",105,22,{align:"center"});d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("DESIGN & PRODUCTIONS  /  SURAT PERINTAH KERJA",105,28,{align:"center"});d.line(17,33,193,33);
-d.setFont("helvetica","bold");d.setFontSize(11);d.text("SURAT PERINTAH KERJA",17,42);d.setFontSize(8.5);
-const info=[["NO. SPK",o.spk_number],["NO. ORDER",o.order_number],["TANGGAL",new Date().toLocaleDateString("id-ID")],["PELANGGAN",customer.name||o.customer_name||"-"],["WHATSAPP",customer.phone||"-"],["KODE TRACKING",o.tracking_code||"-"],["STATUS","DRAFT / MENUNGGU KONFIRMASI"]];
-let y=50;info.forEach(([a,b])=>{d.setFont("helvetica","bold");d.text(a,18,y);d.setFont("helvetica","normal");d.text(String(b||"-").slice(0,48),57,y);y+=6.5});
-d.line(17,91,193,91);d.setFont("helvetica","bold");d.setFontSize(9);d.text("VISUAL PRODUK / AREA PENEMPATAN DESAIN",105,98,{align:"center"});
-function tee(x,y,label){d.setFillColor(32,32,32);d.setDrawColor(20);const shape=[[12,0],[22,6],[31,2],[43,15],[35,24],[30,20],[30,68],[12,68],[12,20],[7,24],[0,15],[9,2],[12,6]];d.lines(shape,x,y,[1,1],"F",true);d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(7);d.text(label,x+21.5,y+78,{align:"center"});d.setTextColor(20,20,20);d.setDrawColor(163,59,48);d.setLineWidth(.8);d.rect(x+17,y+29,9,9);if(designPreview){try{d.addImage(designPreview,x+17,y+29,9,9)}catch{}}d.setFontSize(5.5);d.setTextColor(163,59,48);d.text("AREA DESAIN",x+21.5,y+43,{align:"center"});d.setTextColor(20,20,20);d.setDrawColor(20);d.setLineWidth(.35)}
-tee(54,108,"DEPAN");tee(121,108,"BELAKANG");
-d.line(17,194,193,194);d.setFont("helvetica","bold");d.setFontSize(9);d.text("SPESIFIKASI PESANAN",18,202);
-d.setFont("helvetica","normal");d.setFontSize(8);let yy=211;
-const detail=(o.items||cart).map((it,i)=>(i+1)+". "+(it.product_name_snapshot||it.name)+" / "+(it.quantity||it.qty||1)+" PCS");
-detail.forEach(t=>{d.text(t.slice(0,95),18,yy);yy+=6});
-yy+=3;d.setFont("helvetica","bold");d.text("KETERANGAN SABLON",18,yy);d.text("CATATAN PRODUKSI",111,yy);yy+=7;d.setFont("helvetica","normal");
-const methodSummary=[...new Set((o.items||[]).map(it=>it.printing_method).filter(Boolean))].join(", "),placementSummary=[...new Set((o.items||[]).map(it=>it.placement).filter(Boolean))].join(", ");d.text("Teknik: "+(methodSummary||method),18,yy);d.text("Estimasi: menunggu konfirmasi admin",111,yy);yy+=6;d.text("Posisi: "+(placementSummary||placement),18,yy);d.text("Artwork: "+(o.design_received?"File diterima":"Belum diunggah"),111,yy);yy+=6;
-const sizeSummary=(o.items||[]).flatMap(it=>(it.sizes||[]).map(s=>s.size+":"+s.quantity)).join(", ");d.text("Ukuran: "+(sizeSummary||"-"),18,yy);d.text("Jumlah: "+(o.total_quantity||cart.reduce((a,p)=>a+p.qty,0))+" PCS",111,yy);
-d.setFont("helvetica","bold");d.setFontSize(9);d.text("TOTAL ESTIMASI",18,254);d.text(money(o.total_amount||total),111,254);
-d.setFont("helvetica","normal");d.setFontSize(7);d.text("Dokumen DRAFT. Produksi hanya dimulai setelah spesifikasi, desain, harga, dan pembayaran dikonfirmasi admin.",18,266);
-d.text("Instagram: @_sandikale  |  WhatsApp: +62 822-6641-2844",105,278,{align:"center"});
-d.save((o.spk_number||"SPK-SANDIKALE")+".pdf");if(o.tracking_code){const pdf64=d.output("datauristring").split(",")[1];const{error:archiveError}=await supabase.functions.invoke("showroom-public-api",{body:{action:"save_spk",tracking_code:o.tracking_code,pdf_base64:pdf64}});if(archiveError)sError("SPK terunduh, tetapi arsip server belum tersimpan: "+archiveError.message)}
+const d=new jsPDF({unit:"mm",format:[210,210]});
+const ink=[20,20,20],red=[163,59,48],gray=[95,95,95];
+d.setFillColor(255,255,255);d.rect(0,0,210,210,"F");d.setDrawColor(20);d.setLineWidth(.9);d.rect(1.5,1.5,207,207);
+d.setFont("helvetica","bold");d.setFontSize(25);d.setTextColor(...ink);d.text("SANDIKALE",105,18,{align:"center"});
+d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("D E S I G N   &   P R O D U C T I O N S",105,25,{align:"center"});
+d.setLineWidth(.45);d.setDrawColor(20);d.line(10,29,200,29);
+const items=o.items||[],first=items[0]||{},sizes=items.flatMap(it=>it.sizes||[]).reduce((a,x)=>{a[x.size]=(a[x.size]||0)+Number(x.quantity||0);return a},{}),sizeText=Object.entries(sizes).map(([k,v])=>k+":"+v).join(", ")||"-";
+const info=[
+["BRAND",o.customer?.organization||o.customer_name||customer.name||"-","COLOR",first.color||"Sesuai pilihan"],
+["MODEL",first.model||"OBLONG","DESIGNER","SANDIKALE"],
+["MATERIAL",first.material||"Sesuai katalog","SABLON",first.printing_method||"DTF"],
+["DATE",new Date().toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase(),"SIZE",sizeText],
+["ORDER",o.order_number||"-","QTY",String(o.total_quantity||items.reduce((a,x)=>a+(+x.quantity||0),0))+" PCS"]
+];
+const tx=10,ty=31,tw=190,rh=8.7,leftW=34,midW=78;
+d.setFontSize(6.7);info.forEach((row,i)=>{const y=ty+i*rh;d.setDrawColor(25);d.rect(tx,y,tw,rh);d.line(tx+leftW,y,tx+leftW,y+rh);d.line(tx+leftW+midW,y,tx+leftW+midW,y+rh);d.setFont("helvetica","bold");d.text(row[0],tx+2,y+5.7);d.text(row[2],tx+leftW+2,y+5.7);d.setFont("helvetica","normal");d.text(String(row[1]).slice(0,29),tx+leftW+16,y+5.7);d.text(String(row[3]).slice(0,24),tx+leftW+midW+16,y+5.7)});
+async function imageData(url){if(!url)return null;try{const response=await fetch(url);if(!response.ok)return null;const blob=await response.blob();return await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>resolve(null);reader.readAsDataURL(blob)})}catch{return null}}
+const top=ty+info.length*rh+3,boxY=top,boxH=96,boxW=88;
+async function shirt(it,index,label,x){
+d.setDrawColor(205);d.rect(x,boxY,boxW,boxH);
+const data=await imageData(index===0?it.front_image_url:it.back_image_url)||await imageData(it.image_url);
+if(data){try{d.addImage(data,"JPEG",x+3,boxY+2,boxW-6,boxH-7,undefined,"FAST","NONE")}catch{d.setFontSize(7);d.text("FOTO MOCKUP TIDAK TERBACA",x+boxW/2,boxY+boxH/2,{align:"center"})}}
+else{d.setFont("helvetica","bold");d.setFontSize(8);d.text("FOTO MOCKUP "+label,x+boxW/2,boxY+boxH/2,{align:"center"});d.setFont("helvetica","normal");d.setFontSize(6);d.text("Unggah foto depan/belakang melalui admin",x+boxW/2,boxY+boxH/2+6,{align:"center"})}
+if(designPreview){try{const pos=(it.placement||"").toLowerCase().includes("dada")?{x:x+boxW*.58,y:boxY+boxH*.31,w:10,h:10}:{x:x+boxW*.38,y:boxY+boxH*.37,w:22,h:22};d.addImage(designPreview,"PNG",pos.x,pos.y,pos.w,pos.h,undefined,"FAST")}catch{}}
+d.setFont("helvetica","bold");d.setFontSize(7);d.text(label,x+boxW/2,boxY+boxH-2,{align:"center"});
+}
+await shirt(first,0,"DEPAN",14);await shirt(first,1,"BELAKANG",108);
+const noteY=boxY+boxH+4;d.setDrawColor(20);d.line(10,noteY,200,noteY);
+d.setFont("helvetica","bold");d.setFontSize(7.3);d.text("KETERANGAN SABLON",11,noteY+5);d.text("CATATAN PRODUKSI",108,noteY+5);
+d.setFont("helvetica","normal");d.setFontSize(6.3);
+const placementText=[...new Set(items.map(x=>x.placement).filter(Boolean))].join(", ")||"Sesuai arahan pelanggan";
+const methodText=[...new Set(items.map(x=>x.printing_method).filter(Boolean))].join(", ")||"DTF";
+const details=["1. Posisi: "+placementText,"2. Teknik: "+methodText,"3. File desain: "+(o.design_received?"Diterima":"Belum diunggah")];
+details.forEach((t,i)=>d.text(t.slice(0,78),11,noteY+11+i*4));
+const notes=o.customer?.notes||customer.notes||"Press sesuai standar teknik sablon. Konfirmasi detail sebelum produksi.";
+const noteLines=d.splitTextToSize(String(notes),88);d.text(noteLines.slice(0,3),108,noteY+11);
+d.setFontSize(6.1);d.text("No. SPK "+(o.spk_number||"-")+"  |  Penerima order: SANDIKALE",108,noteY+27);
+d.text("Estimasi selesai: setelah konfirmasi admin",108,noteY+31);
+d.setDrawColor(20);d.line(10,196,200,196);
+d.setFont("helvetica","normal");d.setFontSize(8);d.text("@_sandikale",68,204,{align:"center"});d.text("+62 822-6641-2844",151,204,{align:"center"});
+d.save((o.spk_number||"SPK-SANDIKALE")+".pdf");
+if(o.tracking_code){const pdf64=d.output("datauristring").split(",")[1];const{error:archiveError}=await supabase.functions.invoke("showroom-public-api",{body:{action:"save_spk",tracking_code:o.tracking_code,pdf_base64:pdf64}});if(archiveError)sError("SPK terunduh, tetapi arsip server belum tersimpan: "+archiveError.message)}
 }
 async function submitOrder(e){e.preventDefault();sBusy(true);sError("");const items=cart.map(p=>({product_id:p.id,quantity:p.qty,sizes:Object.entries(p.sizes||{}).filter(x=>+x[1]>0).map(([size,quantity])=>({size,quantity:+quantity})),color:"Custom",placement:p.placement||placement,printing_method:p.printing_method||method}));let design_base64=null;if(design)design_base64=await file64(design);const{data,error}=await supabase.functions.invoke("showroom-public-api",{body:{action:"create_order",customer,items,design_base64,design_name:design?.name}});sBusy(false);if(error||data?.error){sError(data?.error||error?.message||"Pesanan gagal.");return}sReceipt(data);sCheckout(false);sCart([]);window.open("https://wa.me/"+WA+"?text="+encodeURIComponent("Halo SANDIKALE, saya telah mengirim pesanan.\nOrder: "+data.order_number+"\nSPK: "+data.spk_number+"\nTracking: "+data.tracking_code+"\nMohon konfirmasi."),"_blank","noopener,noreferrer")}
 async function decideDesign(id,decision){const notes=decision==="revision_requested"?window.prompt("Jelaskan revisi desain yang diperlukan:",""): "";if(notes===null)return;const{data,error}=await supabase.functions.invoke("showroom-public-api",{body:{action:"design_decision",tracking_code:tracking,design_id:id,decision,notes}});if(error||data?.error){sError(data?.error||error?.message||"Keputusan desain gagal disimpan.");return}await trackOrder(tracking)}
