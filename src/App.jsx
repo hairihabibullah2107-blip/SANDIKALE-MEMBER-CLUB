@@ -37,8 +37,8 @@ const top=ty+info.length*rh+7,boxY=top,boxH=108,boxW=190;
 async function shirt(it){
 d.setDrawColor(205);d.rect(10,boxY,boxW,boxH);
 const mockup=it.mockup_data||(it.garment_type==="long"?MOCKUP_LONG:MOCKUP_SHORT);
-try{d.addImage(mockup,"JPEG",10,boxY,boxW,boxH)}catch{d.setFont("helvetica","bold");d.setFontSize(8);d.text("MOCKUP KAOS SANDIKALE",105,boxY+boxH/2,{align:"center"})}
-const zones={"Depan - Tengah":{x:49,y:boxY+48,w:20,h:24},"Depan - Dada kiri":{x:47,y:boxY+29,w:9,h:9},"Depan - Dada kanan":{x:67,y:boxY+29,w:9,h:9},"Belakang - Tengah":{x:148,y:boxY+45,w:26,h:30},"Lengan kiri":{x:19,y:boxY+31,w:10,h:9},"Lengan kanan":{x:91,y:boxY+31,w:10,h:9}};
+try{d.addImage(mockup,"JPEG",24,boxY,162,boxH)}catch{d.setFont("helvetica","bold");d.setFontSize(8);d.text("MOCKUP KAOS SANDIKALE",105,boxY+boxH/2,{align:"center"})}
+const zones={"Depan - Tengah":{x:58,y:boxY+48,w:17,h:24},"Depan - Dada kiri":{x:53,y:boxY+29,w:8,h:9},"Depan - Dada kanan":{x:70,y:boxY+29,w:8,h:9},"Belakang - Tengah":{x:137,y:boxY+45,w:22,h:30},"Lengan kiri":{x:33,y:boxY+31,w:9,h:9},"Lengan kanan":{x:99,y:boxY+31,w:9,h:9}};
 if(artworkPreview){for(const posName of (it.print_positions||String(it.placement||"Depan - Tengah").split(",").map(x=>x.trim()))){const z=zones[posName];if(!z)continue;try{d.addImage(artworkPreview,artworkPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",z.x,z.y,z.w,z.h)}catch{}}}
 d.setFont("helvetica","bold");d.setFontSize(7);d.text("TAMPAK DEPAN  /  TAMPAK BELAKANG",105,boxY+boxH-2,{align:"center"});
 }
