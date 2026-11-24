@@ -40,7 +40,7 @@ d.setDrawColor(205);d.rect(x,boxY,boxW,boxH);
 const data=await imageData(index===0?it.front_image_url:it.back_image_url)||await imageData(it.image_url);
 if(data){try{d.addImage(data,"JPEG",x+3,boxY+2,boxW-6,boxH-7,undefined,"FAST","NONE")}catch{d.setFontSize(7);d.text("FOTO MOCKUP TIDAK TERBACA",x+boxW/2,boxY+boxH/2,{align:"center"})}}
 else{d.setFont("helvetica","bold");d.setFontSize(8);d.text("FOTO MOCKUP "+label,x+boxW/2,boxY+boxH/2,{align:"center"});d.setFont("helvetica","normal");d.setFontSize(6);d.text("Unggah foto depan/belakang melalui admin",x+boxW/2,boxY+boxH/2+6,{align:"center"})}
-if(designPreview){try{const pos=(it.placement||"").toLowerCase().includes("dada")?{x:x+boxW*.58,y:boxY+boxH*.31,w:10,h:10}:{x:x+boxW*.38,y:boxY+boxH*.37,w:22,h:22};d.addImage(designPreview,designPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",pos.x,pos.y,pos.w,pos.h,undefined,"FAST")}catch{}}
+if(designPreview&&((index===0&&!String(it.placement||"").toLowerCase().includes("belakang"))||(index===1&&String(it.placement||"").toLowerCase().includes("belakang")))){try{const pos=(it.placement||"").toLowerCase().includes("dada")?{x:x+boxW*.58,y:boxY+boxH*.31,w:10,h:10}:{x:x+boxW*.38,y:boxY+boxH*.37,w:22,h:22};d.addImage(designPreview,designPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",pos.x,pos.y,pos.w,pos.h,undefined,"FAST")}catch{}}
 d.setFont("helvetica","bold");d.setFontSize(7);d.text(label,x+boxW/2,boxY+boxH-2,{align:"center"});
 }
 await shirt(first,0,"DEPAN",14);await shirt(first,1,"BELAKANG",108);
