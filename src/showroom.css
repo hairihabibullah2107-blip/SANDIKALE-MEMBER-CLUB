@@ -530,3 +530,195 @@ footer>small{grid-column:1/-1}
 .custom-position-add input{min-width:0;padding:10px;border:1px solid #cfd0c4;background:#f8f8f2;font-size:9px}
 .custom-position-add button{padding:10px;background:#171914;color:#c5ed4b;border:0;font-size:8px;font-weight:900;letter-spacing:.06em}
 @media(max-width:700px){.custom-position-add{grid-template-columns:1fr}.custom-position-add button{min-height:40px}}
+
+/* SANDIKALE STREETWEAR REDESIGN — scoped storefront system */
+.streetwear-site{--sw-black:#080808;--sw-panel:#171717;--sw-orange:#ff4d16;--sw-paper:#f1f0ec;--sw-muted:#a5a5a5;background:var(--sw-black);color:#fff;overflow:hidden}
+.streetwear-site a{color:inherit;text-decoration:none}
+.streetwear-site .announcement-bar{height:29px;padding:0 4.2%;display:flex;align-items:center;justify-content:space-between;background:#171717;color:#c7c7c7;font-size:8px;font-weight:700;letter-spacing:.12em;border-bottom:1px solid #303030}
+.streetwear-site .announcement-bar span:first-child{color:#fff}
+.streetwear-site .announcement-bar span:nth-child(2){color:var(--sw-orange)}
+.streetwear-site .top{height:76px;padding:0 4.2%;display:flex;align-items:center;justify-content:space-between;background:#050505;color:#fff;border-bottom:1px solid #282828;position:sticky;top:0;z-index:30}
+.streetwear-site .brand{color:#fff;gap:0;letter-spacing:0}
+.streetwear-site .brand b{font:italic 900 25px/1 Impact,'Arial Narrow',sans-serif;letter-spacing:-.035em;transform:skew(-7deg)}
+.streetwear-site .brand small{font-size:7px;letter-spacing:.24em;color:#a4a4a4;margin-top:5px}
+.streetwear-site .top nav{display:flex;gap:clamp(16px,3vw,42px);align-items:center}
+.streetwear-site .top nav a{font-size:9px;letter-spacing:.12em;font-weight:800;color:#e8e8e8;transition:color .2s}
+.streetwear-site .top nav a:hover{color:var(--sw-orange)}
+.streetwear-site .header-actions{display:flex;align-items:center;gap:18px}
+.streetwear-site .icon-action{position:relative;border:0;background:none;color:#fff;font-size:25px;line-height:1;padding:5px;cursor:pointer}
+.streetwear-site .cart-action{font-size:19px}
+.streetwear-site .cart-action i{position:absolute;right:-5px;top:-5px;min-width:15px;height:15px;border-radius:50%;background:var(--sw-orange);font:700 9px Arial;display:grid;place-items:center;font-style:normal}
+.streetwear-site .hero{position:relative;min-height:520px;padding:64px 7.2% 54px;display:grid;grid-template-columns:minmax(0,.88fr) minmax(360px,1.12fr);gap:3vw;align-items:center;background:radial-gradient(ellipse at 75% 55%,#262626 0%,#111 43%,#080808 78%);isolation:isolate}
+.streetwear-site .hero:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.13;background-image:linear-gradient(90deg,#fff 1px,transparent 1px),linear-gradient(#fff 1px,transparent 1px);background-size:70px 70px;mask-image:linear-gradient(90deg,transparent,#000)}
+.streetwear-site .hero-copy{position:relative;z-index:2}
+.streetwear-site .hero-copy>small,.streetwear-site .section-heading-dark small,.streetwear-site .campaign-band small,.streetwear-site .culture-copy>small{font-size:9px;letter-spacing:.2em;color:#aaa;font-weight:800}
+.streetwear-site .hero h1{font:900 clamp(66px,9vw,132px)/.82 Impact,'Arial Narrow',sans-serif;letter-spacing:-.025em;color:#fff;margin:28px 0 24px;text-transform:uppercase}
+.streetwear-site .hero h1 em,.streetwear-site .section-heading-dark h2 em,.streetwear-site .campaign-band h2 em,.streetwear-site .culture-copy h2 em{font-style:normal;color:var(--sw-orange)}
+.streetwear-site .hero-copy>p{font-size:13px;line-height:1.8;color:#c0c0c0;max-width:390px;margin:0 0 26px}
+.streetwear-site .hero-ctas{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.streetwear-site .btn{background:var(--sw-orange);color:#080808;padding:15px 20px;font-size:9px;font-weight:900;letter-spacing:.1em;border:1px solid var(--sw-orange);transition:transform .2s,background .2s,color .2s}
+.streetwear-site .btn:hover{background:#fff;border-color:#fff;color:#080808;transform:translateY(-2px)}
+.streetwear-site .hero-secondary{font-size:9px;font-weight:800;letter-spacing:.1em;color:#fff;border-bottom:1px solid #777;padding:12px 0}
+.streetwear-site .hero-secondary b{color:var(--sw-orange);margin-left:8px}
+.streetwear-site .meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:52px;color:#a5a5a5;font-size:8px;letter-spacing:.13em}
+.streetwear-site .meta span:before{content:"✳";color:var(--sw-orange);margin-right:7px}
+.streetwear-site .hero-art{height:390px;position:relative;display:grid;place-items:center;background:linear-gradient(145deg,#242424,#0e0e0e);border:1px solid #393939;overflow:hidden}
+.streetwear-site .hero-art:before{content:"";position:absolute;inset:12px;border:1px solid #ffffff22;pointer-events:none;z-index:2}
+.streetwear-site .hero-art:after{content:"SANDIKALE / 001";position:absolute;right:25px;top:25px;font-size:8px;letter-spacing:.2em;color:#fff;z-index:3}
+.streetwear-site .hero-product-image{width:100%;height:100%;object-fit:cover;opacity:.9;mix-blend-mode:normal;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+.streetwear-site .hero-art:hover .hero-product-image{transform:scale(1.045)}
+.streetwear-site .hero-wordmark{display:flex;flex-direction:column;align-items:center;transform:rotate(-8deg)}
+.streetwear-site .hero-wordmark span{font:900 clamp(40px,6vw,78px)/.85 Impact,sans-serif;letter-spacing:-.04em}
+.streetwear-site .hero-wordmark small{font-size:8px;letter-spacing:.3em;color:#aaa;margin-top:14px}
+.streetwear-site .hero-stamp{position:absolute;left:22px;bottom:24px;font:900 28px/.85 Impact,sans-serif;transform:rotate(-8deg);text-shadow:2px 3px #000;z-index:3}
+.streetwear-site .hero-stamp b{color:var(--sw-orange)}
+.streetwear-site .hero-caption{position:absolute;bottom:18px;right:23px;font-size:8px;letter-spacing:.18em;color:#fff;z-index:3}
+.streetwear-site .hero-index{position:absolute;bottom:17px;left:7.2%;font-size:8px;color:#666;letter-spacing:.18em}
+.streetwear-site .street-marquee{overflow:hidden;background:var(--sw-orange);color:#080808;padding:13px 0;white-space:nowrap}
+.streetwear-site .street-marquee div{width:max-content;font:900 18px/1 Impact,'Arial Narrow',sans-serif;letter-spacing:.06em;animation:sw-marquee 34s linear infinite}
+@keyframes sw-marquee{to{transform:translateX(-50%)}}
+.streetwear-site .category-section{padding:54px 4.2% 62px;background:var(--sw-paper);color:#111}
+.streetwear-site .section-heading-dark{display:flex;align-items:end;justify-content:space-between;margin-bottom:22px}
+.streetwear-site .section-heading-dark small{color:#777}
+.streetwear-site .section-heading-dark h2{font:900 clamp(32px,4vw,49px)/.95 Impact,'Arial Narrow',sans-serif;margin:10px 0 0;letter-spacing:-.015em}
+.streetwear-site .section-heading-dark h2 em{color:var(--sw-orange)}
+.streetwear-site .section-heading-dark>a{font-size:8px;font-weight:900;letter-spacing:.12em;border-bottom:1px solid #111;padding-bottom:8px}
+.streetwear-site .category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.streetwear-site .category-card{height:210px;position:relative;overflow:hidden;border:0;background:#252525;text-align:left;color:#fff;padding:0;cursor:pointer}
+.streetwear-site .category-card img{width:100%;height:100%;object-fit:cover;filter:grayscale(1);transition:transform .6s,filter .4s}
+.streetwear-site .category-card:hover img{transform:scale(1.07);filter:grayscale(.25)}
+.streetwear-site .category-placeholder{width:100%;height:100%;display:grid;place-content:center;text-align:center;font:900 25px/.9 Impact;color:#aaa;background:linear-gradient(135deg,#333,#111)}
+.streetwear-site .category-shade{position:absolute;inset:0;background:linear-gradient(0deg,#000c,transparent 65%)}
+.streetwear-site .category-card>b{position:absolute;left:16px;bottom:34px;font:900 22px Impact,sans-serif;text-transform:uppercase}
+.streetwear-site .category-card>small{position:absolute;left:17px;bottom:15px;font-size:8px;color:var(--sw-orange);font-weight:900;letter-spacing:.12em}
+.streetwear-site .catalog{padding:58px 4.2% 66px;background:#080808;color:#fff}
+.streetwear-site .catalog .heading{align-items:end;margin-bottom:22px}
+.streetwear-site .catalog .heading small{font-size:9px;color:#999;letter-spacing:.18em;font-weight:800}
+.streetwear-site .catalog .heading h2{font:900 clamp(35px,4vw,50px)/.95 Impact,sans-serif;letter-spacing:-.02em;color:#fff;margin:9px 0 0}
+.streetwear-site .catalog .heading h2 span{color:var(--sw-orange)}
+.streetwear-site .catalog .heading input{max-width:270px;background:#161616;border:1px solid #454545;color:#fff;padding:13px 14px;font-size:10px;letter-spacing:.08em}
+.streetwear-site .catalog .heading input:focus{outline:1px solid var(--sw-orange);border-color:var(--sw-orange)}
+.streetwear-site .filters{gap:8px;margin:0 0 23px}
+.streetwear-site .filters button{border:1px solid #414141;background:transparent;color:#bbb;padding:9px 13px;font-size:9px;font-weight:800;letter-spacing:.06em;transition:.2s}
+.streetwear-site .filters button.active,.streetwear-site .filters button:hover{background:var(--sw-orange);border-color:var(--sw-orange);color:#080808}
+.streetwear-site .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.streetwear-site .grid>article{background:#171717;border:1px solid #2b2b2b;padding:8px;transition:transform .25s,border-color .25s}
+.streetwear-site .grid>article:hover{transform:translateY(-5px);border-color:#777}
+.streetwear-site .photo{height:auto;aspect-ratio: .86;background:#242424;position:relative;overflow:hidden}
+.streetwear-site .photo img{width:100%;height:100%;object-fit:cover;transition:transform .55s,filter .4s;filter:saturate(.82)}
+.streetwear-site .grid>article:hover .photo img{transform:scale(1.055);filter:saturate(1)}
+.streetwear-site .photo>small{position:absolute;bottom:10px;left:10px;background:var(--sw-orange);color:#080808;padding:7px 9px;font-size:8px;font-weight:900;letter-spacing:.1em;opacity:0;transform:translateY(5px);transition:.2s}
+.streetwear-site .grid>article:hover .photo>small{opacity:1;transform:translateY(0)}
+.streetwear-site .prodinfo{padding:13px 5px 8px;align-items:start}
+.streetwear-site .prodinfo h3{font:700 12px/1.35 Manrope,sans-serif;color:#fff;margin:0 0 5px}
+.streetwear-site .prodinfo small{font-size:8px;color:#929292;letter-spacing:.08em}
+.streetwear-site .prodinfo>b{font-size:11px;color:#fff;white-space:nowrap}
+.streetwear-site .product-choose{width:100%;display:flex;justify-content:space-between;padding:12px 5px 5px;border-top:1px solid #333;color:#ddd;font-size:8px;letter-spacing:.1em}
+.streetwear-site .product-choose:hover{color:var(--sw-orange)}
+.streetwear-site .campaign-band{padding:43px 7%;display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(105deg,#f04b13,#ff6b21 56%,#d9370d);color:#090909;position:relative;overflow:hidden}
+.streetwear-site .campaign-band:after{content:"SK";position:absolute;right:18%;top:-55px;font:900 210px/.9 Impact,sans-serif;color:#00000012;transform:rotate(-9deg);pointer-events:none}
+.streetwear-site .campaign-band small{color:#32160c}
+.streetwear-site .campaign-band h2{font:900 clamp(34px,5vw,66px)/.9 Impact,sans-serif;margin:12px 0;letter-spacing:-.02em}
+.streetwear-site .campaign-band h2 em{color:#fff}
+.streetwear-site .campaign-band p{font-size:11px;line-height:1.7;max-width:430px;margin:0}
+.streetwear-site .campaign-band>a{position:relative;z-index:1;white-space:nowrap;padding:14px 18px;border:1px solid #111;font-size:9px;font-weight:900;letter-spacing:.1em;transition:.2s}
+.streetwear-site .campaign-band>a:hover{background:#080808;color:#fff}
+.streetwear-site .culture-section{padding:55px 4.2%;background:#111;display:grid;grid-template-columns:.72fr 1.28fr;gap:5vw;align-items:center}
+.streetwear-site .culture-copy h2{font:900 clamp(40px,5vw,65px)/.9 Impact,sans-serif;margin:18px 0}
+.streetwear-site .culture-copy h2 em{color:var(--sw-orange)}
+.streetwear-site .culture-copy p{max-width:340px;font-size:12px;line-height:1.85;color:#aaa}
+.streetwear-site .culture-copy>a{display:inline-block;margin-top:15px;font-size:8px;font-weight:900;letter-spacing:.12em;border-bottom:1px solid #777;padding-bottom:9px}
+.streetwear-site .culture-images{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.streetwear-site .culture-images figure{margin:0;position:relative;min-height:220px;background:#242424;overflow:hidden}
+.streetwear-site .culture-images img{width:100%;height:100%;min-height:220px;object-fit:cover;filter:grayscale(.35);transition:transform .6s}
+.streetwear-site .culture-images figure:hover img{transform:scale(1.06)}
+.streetwear-site .culture-images figcaption{position:absolute;bottom:0;left:0;right:0;padding:25px 10px 10px;background:linear-gradient(transparent,#000c);font-size:9px;font-weight:800}
+.streetwear-site .howto{padding:58px 7%;background:#f1f0ec;color:#111;display:grid;grid-template-columns:.85fr 1.15fr;gap:5vw}
+.streetwear-site .howto-heading>small{color:#777}
+.streetwear-site .howto-heading h2{font:900 clamp(39px,5vw,62px)/.92 Impact,sans-serif;letter-spacing:0;margin:16px 0}
+.streetwear-site .howto-heading h2 i{font-style:normal;color:var(--sw-orange)}
+.streetwear-site .howto-heading>p{font-size:12px;line-height:1.8;color:#666}
+.streetwear-site .howto-steps article{grid-template-columns:48px 1fr;padding:18px 0;border-color:#d0d0ca}
+.streetwear-site .howto-steps article>span{font:900 16px Impact;color:var(--sw-orange)}
+.streetwear-site .howto-steps b{font:900 15px Impact;letter-spacing:.04em}
+.streetwear-site .howto-steps p{font-size:11px;color:#686868}
+.streetwear-site .howto-start{grid-column:2;font-size:9px;letter-spacing:.1em;border-color:#111}
+.streetwear-site .custom{padding:46px 7%;background:#191919;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:30px}
+.streetwear-site .custom h2{font:900 clamp(38px,5vw,60px)/.9 Impact,sans-serif;margin:12px 0}
+.streetwear-site .custom h2 i{font-style:normal;color:var(--sw-orange)}
+.streetwear-site .custom p{max-width:390px;color:#aaa;font-size:12px;line-height:1.8}
+.streetwear-site .trackstrip{padding:36px 7%;background:#e9e8e3;color:#111}
+.streetwear-site .trackstrip h2{font:900 30px Impact,sans-serif}
+.streetwear-site .trackstrip input{background:#fff;border:1px solid #ccc;padding:13px;color:#111}
+.streetwear-site .trackstrip .btn{background:#111;color:#fff;border-color:#111}
+.streetwear-site .street-footer{padding:42px 4.2% 20px;background:#050505;color:#fff;border-top:1px solid #333}
+.streetwear-site .footer-main{display:grid;grid-template-columns:1.5fr 1fr 1fr 1.2fr;gap:35px;padding-bottom:34px}
+.streetwear-site .footer-main>div{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.streetwear-site .footer-main>div>b{font-size:8px;letter-spacing:.16em;color:#fff;margin-bottom:5px}
+.streetwear-site .footer-main a,.streetwear-site .footer-main p{font-size:10px;line-height:1.8;color:#999;margin:0}
+.streetwear-site .footer-main a:hover{color:var(--sw-orange)}
+.streetwear-site .footer-brand p{font-size:11px;color:#aaa;line-height:1.7;margin:12px 0}
+.streetwear-site .footer-brand>a{color:var(--sw-orange)}
+.streetwear-site .footer-bottom{border-top:1px solid #292929;padding-top:17px;display:flex;justify-content:space-between;gap:15px;color:#777;font-size:8px;letter-spacing:.08em}
+.streetwear-site .admin-lock{position:absolute;right:18px;bottom:16px;width:22px;height:22px;color:#777;background:transparent;border:0;opacity:.65}
+.streetwear-site .admin-lock:hover{color:#fff;opacity:1}
+.streetwear-site .custom-shade{background:#000e;backdrop-filter:blur(8px)}
+.streetwear-site .custom-workbench{background:#111;color:#fff;border:1px solid #444;box-shadow:0 25px 90px #000a}
+.streetwear-site .custom-head{background:#080808;border-bottom:1px solid #333;padding:24px 28px}
+.streetwear-site .custom-head h2{font:900 clamp(28px,4vw,44px)/.95 Impact,sans-serif;letter-spacing:.01em}
+.streetwear-site .custom-head h2 i{color:var(--sw-orange);font-style:normal}
+.streetwear-site .custom-head p{color:#aaa}
+.streetwear-site .custom-progress{background:#171717;border-bottom:1px solid #333}
+.streetwear-site .custom-progress span{color:#777}
+.streetwear-site .custom-progress span.active{color:#fff}
+.streetwear-site .custom-progress span.active b{background:var(--sw-orange);color:#111}
+.streetwear-site .custom-body{background:#111}
+.streetwear-site .custom-visual{background:#1a1a1a;border-color:#333}
+.streetwear-site .visual-top{color:#ddd}
+.streetwear-site .visual-product{background:radial-gradient(ellipse,#3a3a3a,#171717 72%)}
+.streetwear-site .visual-note{background:#222;color:#aaa}
+.streetwear-site .visual-product-tag{color:#fff}
+.streetwear-site .custom-controls{background:#101010}
+.streetwear-site .custom-step{border-bottom:1px solid #333}
+.streetwear-site .step-title h3{color:#fff}
+.streetwear-site .step-title p{color:#999}
+.streetwear-site .step-title>span{color:var(--sw-orange)}
+.streetwear-site .choice-card{background:#191919;border-color:#393939;color:#fff}
+.streetwear-site .choice-card:hover,.streetwear-site .choice-card.chosen{border-color:var(--sw-orange);background:#211811}
+.streetwear-site .choice-card small,.streetwear-site .choice-card em{color:#aaa}
+.streetwear-site .colorway,.streetwear-site .placement-tile{background:#191919;border-color:#393939;color:#fff}
+.streetwear-site .colorway.chosen,.streetwear-site .placement-tile.selected{border-color:var(--sw-orange);background:#25170f}
+.streetwear-site .artwork-card{background:#191919;border-color:#393939;color:#fff}
+.streetwear-site .artwork-card-head{border-color:#333}
+.streetwear-site .field-label,.streetwear-site .artwork-card-head b{color:#fff}
+.streetwear-site .artwork-card select,.streetwear-site .custom-position-add input{background:#101010;border-color:#444;color:#fff}
+.streetwear-site .upload-zone{background:#1b1b1b;border-color:#555;color:#fff}
+.streetwear-site .artwork-transform-tools{color:#aaa}
+.streetwear-site .artwork-transform-tools button{background:#222;border-color:#555;color:#fff}
+.streetwear-site .artwork-price{border-color:#444;color:#aaa}
+.streetwear-site .custom-summary{background:#080808;border-left:1px solid #333}
+.streetwear-site .summary-sticky{color:#fff}
+.streetwear-site .summary-sticky h3{color:#fff}
+.streetwear-site .summary-line,.streetwear-site .summary-prints,.streetwear-site .summary-checklist{color:#aaa}
+.streetwear-site .summary-line b,.streetwear-site .summary-prints b{color:#fff}
+.streetwear-site .summary-total{background:#1b1b1b;color:#fff;border-color:#444}
+.streetwear-site .summary-total strong{color:var(--sw-orange)}
+.streetwear-site .summary-sticky>.btn{width:100%;background:var(--sw-orange);color:#111}
+.streetwear-site .shade .checkout,.streetwear-site .shade .receipt,.streetwear-site .shade .login{background:#151515;color:#fff;border:1px solid #444}
+.streetwear-site .checkout h2,.streetwear-site .receipt h2{color:#fff}
+.streetwear-site .checkout label>span{color:#ddd}
+.streetwear-site .checkout input,.streetwear-site .checkout textarea{background:#080808;color:#fff;border-color:#444}
+.streetwear-site .checkout-note{background:#202020;color:#bbb}
+.streetwear-site .admin-gate input{background:#080808;color:#fff;border-color:#444}
+.streetwear-site .x{color:#fff}
+.streetwear-site .trackpage{background:#090909;color:#fff;min-height:100vh;padding:35px}
+.streetwear-site .trackcard{background:#171717;color:#fff;border-color:#444}
+.streetwear-site .trackcard h1,.streetwear-site .trackcard h2{color:#fff}
+.streetwear-site .trackcard input{background:#080808;color:#fff;border-color:#444}
+.streetwear-site .empty{background:#171717;color:#fff;border-color:#444}
+.streetwear-site .skeleton-photo,.streetwear-site .skeleton-line{background:linear-gradient(90deg,#1a1a1a,#292929,#1a1a1a);background-size:200% 100%;animation:sw-skeleton 1.4s infinite}
+@keyframes sw-skeleton{to{background-position:-200% 0}}
+.streetwear-site .grid>article,.streetwear-site .category-card,.streetwear-site .btn{will-change:transform}
+@media(max-width:900px){.streetwear-site .hero{grid-template-columns:1fr 1fr;padding:50px 5%;min-height:450px}.streetwear-site .hero-art{height:330px}.streetwear-site .grid{grid-template-columns:repeat(3,minmax(0,1fr))}.streetwear-site .category-card{height:170px}.streetwear-site .footer-main{grid-template-columns:1.2fr 1fr 1fr}.streetwear-site .footer-main>div:last-child{grid-column:2/4}.streetwear-site .custom-body{grid-template-columns:1fr}.streetwear-site .custom-visual{position:relative;top:auto}.streetwear-site .custom-summary{border-left:0;border-top:1px solid #333}}
+@media(max-width:640px){.streetwear-site .announcement-bar{height:26px;padding:0 12px;font-size:7px}.streetwear-site .announcement-bar span:nth-child(2){display:none}.streetwear-site .top{height:62px;padding:0 15px}.streetwear-site .brand b{font-size:21px}.streetwear-site .top nav{display:none}.streetwear-site .header-actions{gap:12px}.streetwear-site .hero{display:flex;flex-direction:column;align-items:stretch;gap:25px;padding:43px 18px 36px}.streetwear-site .hero h1{font-size:clamp(66px,18vw,100px);margin:22px 0 17px}.streetwear-site .hero-copy>p{font-size:12px;max-width:340px}.streetwear-site .hero-art{height:300px;min-height:300px}.streetwear-site .hero-index{left:18px;bottom:12px}.streetwear-site .meta{margin-top:27px;gap:13px;font-size:7px}.streetwear-site .street-marquee{padding:11px 0}.streetwear-site .street-marquee div{font-size:15px}.streetwear-site .category-section{padding:38px 15px 42px}.streetwear-site .section-heading-dark{align-items:end}.streetwear-site .section-heading-dark h2{font-size:34px}.streetwear-site .section-heading-dark>a{font-size:7px}.streetwear-site .category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.streetwear-site .category-card{height:155px}.streetwear-site .category-card>b{font-size:18px;left:11px;bottom:31px}.streetwear-site .category-card>small{left:12px;bottom:13px}.streetwear-site .catalog{padding:42px 14px}.streetwear-site .catalog .heading{display:flex;flex-direction:column;align-items:stretch;gap:15px}.streetwear-site .catalog .heading h2{font-size:39px}.streetwear-site .catalog .heading input{max-width:none;width:100%}.streetwear-site .filters{overflow-x:auto;flex-wrap:nowrap;padding-bottom:5px}.streetwear-site .filters button{white-space:nowrap}.streetwear-site .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.streetwear-site .grid>article{padding:5px}.streetwear-site .prodinfo{gap:5px;padding:10px 3px 6px}.streetwear-site .prodinfo h3{font-size:10px}.streetwear-site .prodinfo>b{font-size:9px}.streetwear-site .product-choose{font-size:7px}.streetwear-site .campaign-band{padding:34px 18px;display:block}.streetwear-site .campaign-band h2{font-size:43px}.streetwear-site .campaign-band>a{display:inline-block;margin-top:20px}.streetwear-site .culture-section{padding:40px 16px;grid-template-columns:1fr;gap:24px}.streetwear-site .culture-copy h2{font-size:52px}.streetwear-site .culture-images{gap:7px}.streetwear-site .culture-images figure,.streetwear-site .culture-images img{min-height:145px}.streetwear-site .howto{padding:40px 18px;grid-template-columns:1fr;gap:24px}.streetwear-site .howto-heading h2{font-size:48px}.streetwear-site .howto-start{grid-column:1}.streetwear-site .custom{padding:34px 18px;display:block}.streetwear-site .custom p{margin:15px 0}.streetwear-site .trackstrip{padding:30px 18px;display:block}.streetwear-site .trackstrip form{margin-top:15px}.streetwear-site .street-footer{padding:32px 18px 18px}.streetwear-site .footer-main{grid-template-columns:1fr 1fr;gap:24px 15px}.streetwear-site .footer-main>div:last-child{grid-column:auto}.streetwear-site .footer-bottom{flex-direction:column}.streetwear-site .custom-workbench{width:100%;height:100%;max-height:100vh;border:0;border-radius:0;overflow:auto}.streetwear-site .custom-head{padding:18px}.streetwear-site .custom-progress{overflow-x:auto;gap:8px;padding:12px}.streetwear-site .custom-progress span{white-space:nowrap}.streetwear-site .custom-body{display:flex;flex-direction:column}.streetwear-site .custom-visual{min-height:300px;padding:12px}.streetwear-site .visual-product{min-height:245px}.streetwear-site .custom-controls{padding:0 16px}.streetwear-site .custom-step{padding:22px 0}.streetwear-site .custom-summary{padding:18px}.streetwear-site .checkout,.streetwear-site .receipt,.streetwear-site .admin-gate{width:calc(100% - 24px);max-height:calc(100vh - 24px);overflow:auto;padding:24px 18px}.streetwear-site .trackpage{padding:20px 12px}}
+@media(prefers-reduced-motion:reduce){.streetwear-site *, .streetwear-site *:before,.streetwear-site *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
