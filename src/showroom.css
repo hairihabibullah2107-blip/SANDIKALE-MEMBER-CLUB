@@ -128,3 +128,18 @@ footer{position:relative;grid-template-columns:1fr 1fr;padding:55px 9vw 40px;bac
 .modalart{position:relative;display:flex;align-items:center;justify-content:center}
 .mockup-artwork{position:absolute;height:auto;max-height:28%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
 @media(max-width:760px){.mockup-preview{max-height:280px}.position-option{padding:10px}}
+
+/* Accurate garment mockup presentation and production pricing */
+.garment-preview{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;align-items:center;padding:18px;background:#f0efeb}
+.garment-view{min-width:0;display:grid;gap:8px;align-items:center}
+.garment-view>small{font-size:8px;letter-spacing:.14em;font-weight:700;text-align:center;color:#777}
+.shirt-canvas{position:relative;width:100%;aspect-ratio:.9/1;display:grid;place-items:center;overflow:hidden;background:transparent}
+.shirt-canvas>img:not(.mockup-artwork){position:absolute;inset:0;width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+.shirt-tint{position:absolute;inset:0;background:var(--shirt-color);mask-size:100% 100%;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center}
+.mockup-artwork{position:absolute;object-fit:contain;mix-blend-mode:multiply;max-width:none;max-height:none;z-index:2;pointer-events:none}
+.zone-front-center{left:35%;top:38%;width:30%;height:30%}.zone-front-left{left:33%;top:27%;width:12%;height:12%}.zone-front-right{left:55%;top:27%;width:12%;height:12%}.zone-back-center{left:35%;top:36%;width:30%;height:34%}.zone-sleeve-left{left:3%;top:28%;width:17%;height:14%}.zone-sleeve-right{right:3%;top:28%;width:17%;height:14%}
+.mockup-empty{display:grid;place-items:center;min-height:220px;padding:25px;text-align:center;background:#e6e5df;color:#777;font-size:11px;line-height:1.7}
+.print-upload{display:grid;gap:10px;padding:14px;background:#f1f0eb;border:1px solid #dfded7}.print-upload>b{font-size:10px;letter-spacing:.08em}
+.dtf-rate-list{display:grid;gap:8px;max-width:620px;margin:15px 0 35px}.dtf-rate{display:grid;grid-template-columns:1fr 130px auto;align-items:center;gap:12px;padding:12px;background:#f0efea;border:1px solid #deddd6}.dtf-rate>b{font-size:11px}.dtf-rate input{min-width:0;padding:10px;border:1px solid #d5d3ca;background:#fff}
+.mockup-admin-list{display:grid;gap:6px;margin-top:15px}.mockup-admin-list p{font-size:11px;padding:9px 12px;background:#f0efea}.mockup-admin-list small{margin-left:8px;color:#888}
+@media(max-width:760px){.garment-preview{padding:8px;gap:4px}.dtf-rate{grid-template-columns:1fr 100px}.dtf-rate .btn{grid-column:1/-1}}
