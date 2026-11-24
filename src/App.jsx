@@ -17,45 +17,46 @@ async function trackOrder(code){sTrackData(null);sError("");const{data,error}=aw
 const shown=useMemo(()=>products.filter(p=>(filter==="Semua"||p.showroom_categories?.name===filter)&&p.name.toLowerCase().includes(search.toLowerCase())),[products,filter,search]),total=cart.reduce((a,p)=>a+(+p.base_price||0)*p.qty,0);
 function add(p){const selectedQty=Object.values(sizes).reduce((a,b)=>a+(+b||0),0);if(selectedQty<1){sError("Pilih minimal satu ukuran dengan jumlah lebih dari nol.");return}if(!placement.length){sError("Pilih minimal satu posisi sablon.");return}const config={...p,qty:selectedQty,sizes:{...sizes},placement:placement.join(", "),print_positions:[...placement],garment_type:garmentType,printing_method:"DTF"};sCart(old=>old.some(x=>x.id===p.id&&x.garment_type===config.garment_type&&x.placement===config.placement)?old.map(x=>x.id===p.id&&x.garment_type===config.garment_type&&x.placement===config.placement?{...x,qty:x.qty+config.qty,sizes:Object.fromEntries([...new Set([...Object.keys(x.sizes||{}),...Object.keys(config.sizes)])].map(k=>[k,(+x.sizes?.[k]||0)+(+config.sizes?.[k]||0)]))}:x):[...old,config]);sSizes({M:1});ss(null)}
 async function spk(o){
-const d=new jsPDF({unit:"mm",format:[210,210]});const artworkPreview=o.design_preview||designPreview;
+const d=new jsPDF({unit:"mm",format:"a4"});const artworkPreview=o.design_preview||designPreview;
 const ink=[20,20,20],red=[163,59,48],gray=[95,95,95];
-d.setFillColor(255,255,255);d.rect(0,0,210,210,"F");d.setDrawColor(20);d.setLineWidth(.9);d.rect(1.5,1.5,207,207);
-d.setFont("helvetica","bold");d.setFontSize(25);d.setTextColor(...ink);d.text("SANDIKALE",105,18,{align:"center"});
-d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("D E S I G N   &   P R O D U C T I O N S",105,25,{align:"center"});
-d.setLineWidth(.45);d.setDrawColor(20);d.line(10,29,200,29);
+d.setFillColor(255,255,255);d.rect(0,0,210,210,"F");d.setDrawColor(20);d.setLineWidth(.9);d.rect(1.5,1.5,207,294);
+d.setFont("helvetica","bold");d.setFontSize(25);d.setTextColor(...ink);d.text("SANDIKALE",105,21,{align:"center"});
+d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("D E S I G N   &   P R O D U C T I O N S",105,29,{align:"center"});
+d.setLineWidth(.45);d.setDrawColor(20);d.line(10,34,200,34);
 const items=o.items||[],first=items[0]||{},sizes=items.flatMap(it=>it.sizes||[]).reduce((a,x)=>{a[x.size]=(a[x.size]||0)+Number(x.quantity||0);return a},{}),sizeText=Object.entries(sizes).map(([k,v])=>k+":"+v).join(", ")||"-";
 const info=[
 [["BRAND",o.customer?.organization||o.customer?.name||o.customer_name||customer.name||"-"],["COLOR",first.color||"Hitam"],["SIZE",sizeText]],
 [["MODEL",(first.model||"OBLONG")+" / "+(first.garment_type==="long"?"LENGAN PANJANG":"LENGAN PENDEK")],["DESIGNER","SANDIKALE"],["SABLON","DTF"]],
 [["MATERIAL",first.material||"Sesuai katalog"],["DATE",new Date().toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase()],["QTY",String(o.total_quantity||items.reduce((a,x)=>a+(+x.quantity||0),0))+" PCS"]]
 ];
-const tx=10,ty=31,tw=190,rh=11,cw=tw/3;
-info.forEach((row,i)=>{const y=ty+i*rh;d.setDrawColor(25);d.rect(tx,y,tw,rh);row.forEach((cell,j)=>{const x=tx+j*cw;if(j)d.line(x,y,x,y+rh);d.setFont("helvetica","bold");d.setFontSize(5.8);d.text(cell[0],x+2,y+6.8);d.setFont("helvetica","normal");d.setFontSize(6.1);d.text(String(cell[1]).slice(0,26),x+19,y+6.8)})});
+const tx=10,ty=37,tw=190,rh=10,logoW=30,cw=(tw-logoW)/3;
+d.setDrawColor(25);d.rect(tx,ty,logoW,rh*3);d.setTextColor(163,59,48);d.setFont("helvetica","bold");d.setFontSize(13);d.text("SK",tx+logoW/2,ty+16,{align:"center"});d.setTextColor(...ink);
+info.forEach((row,i)=>{const y=ty+i*rh;d.setDrawColor(25);d.line(tx+logoW,y,tx+tw,y);row.forEach((cell,j)=>{const x=tx+logoW+j*cw;d.rect(x,y,cw,rh);d.setFont("helvetica","bold");d.setFontSize(5.7);d.text(cell[0],x+1.5,y+6.2);d.setFont("helvetica","normal");d.setFontSize(5.8);d.text(String(cell[1]).slice(0,22),x+16,y+6.2)})});
 async function imageData(url){if(!url)return null;try{const response=await fetch(url);if(!response.ok)return null;const blob=await response.blob();return await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas");canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext("2d").drawImage(img,0,0);resolve(canvas.toDataURL("image/jpeg",.9))};img.onerror=()=>resolve(null);img.src=String(reader.result)};reader.onerror=()=>resolve(null);reader.readAsDataURL(blob)})}catch{return null}}
-const top=ty+info.length*rh+3,boxY=top,boxH=88,boxW=190;
+const top=ty+info.length*rh+7,boxY=top,boxH=108,boxW=190;
 async function shirt(it){
 d.setDrawColor(205);d.rect(10,boxY,boxW,boxH);
 const mockup=it.mockup_data||(it.garment_type==="long"?MOCKUP_LONG:MOCKUP_SHORT);
 try{d.addImage(mockup,"JPEG",10,boxY,boxW,boxH)}catch{d.setFont("helvetica","bold");d.setFontSize(8);d.text("MOCKUP KAOS SANDIKALE",105,boxY+boxH/2,{align:"center"})}
-const zones={"Depan - Tengah":{x:48,y:boxY+37,w:18,h:19},"Depan - Dada kiri":{x:43,y:boxY+25,w:8,h:8},"Depan - Dada kanan":{x:62,y:boxY+25,w:8,h:8},"Belakang - Tengah":{x:139,y:boxY+34,w:22,h:24},"Lengan kiri":{x:22,y:boxY+27,w:9,h:8},"Lengan kanan":{x:88,y:boxY+27,w:9,h:8}};
+const zones={"Depan - Tengah":{x:49,y:boxY+48,w:20,h:24},"Depan - Dada kiri":{x:47,y:boxY+29,w:9,h:9},"Depan - Dada kanan":{x:67,y:boxY+29,w:9,h:9},"Belakang - Tengah":{x:148,y:boxY+45,w:26,h:30},"Lengan kiri":{x:19,y:boxY+31,w:10,h:9},"Lengan kanan":{x:91,y:boxY+31,w:10,h:9}};
 if(artworkPreview){for(const posName of (it.print_positions||String(it.placement||"Depan - Tengah").split(",").map(x=>x.trim()))){const z=zones[posName];if(!z)continue;try{d.addImage(artworkPreview,artworkPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",z.x,z.y,z.w,z.h)}catch{}}}
 d.setFont("helvetica","bold");d.setFontSize(7);d.text("TAMPAK DEPAN  /  TAMPAK BELAKANG",105,boxY+boxH-2,{align:"center"});
 }
 await shirt(first);
 
-const noteY=boxY+boxH+4;d.setDrawColor(20);d.line(10,noteY,200,noteY);
+const noteY=boxY+boxH+8;d.setDrawColor(20);d.line(10,noteY,200,noteY);
 d.setFont("helvetica","bold");d.setFontSize(7.3);d.text("KETERANGAN SABLON",11,noteY+5);d.text("CATATAN PRODUKSI",108,noteY+5);
 d.setFont("helvetica","normal");d.setFontSize(6.3);
 const placementText=[...new Set(items.map(x=>x.placement).filter(Boolean))].join(", ")||"Sesuai arahan pelanggan";
 const methodText=[...new Set(items.map(x=>x.printing_method).filter(Boolean))].join(", ")||"DTF";
 const details=[...String(placementText).split(", ").map((p,i)=>(i+1)+". "+p+" - DTF"),(items.length>1?"Jumlah model: "+items.length+" varian":"File desain: "+(o.design_received?"Diterima":"Belum diunggah"))];
-details.forEach((t,i)=>d.text(t.slice(0,78),11,noteY+11+i*4));
+details.forEach((t,i)=>d.text(t.slice(0,78),11,noteY+11+i*5));
 const notes=o.customer?.notes||customer.notes||"Press sesuai standar teknik sablon. Konfirmasi detail sebelum produksi.";
 const noteLines=d.splitTextToSize(String(notes),88);d.text(noteLines.slice(0,3),108,noteY+11);
-d.setFontSize(6.1);d.text("No. SPK "+(o.spk_number||"-")+"  |  Penerima order: SANDIKALE",108,noteY+27);
-d.text("Estimasi selesai: setelah konfirmasi admin",108,noteY+31);
-d.setDrawColor(20);d.line(10,200,200,200);
-d.setFont("helvetica","normal");d.setFontSize(8);d.text("@_sandikale",68,207,{align:"center"});d.text("+62 822-6641-2844",151,207,{align:"center"});
+d.setFontSize(6.1);d.text("No. SPK "+(o.spk_number||"-"),108,noteY+27);d.text("Penerima order: "+(o.customer?.name||o.customer_name||"SANDIKALE"),108,noteY+32);
+d.text("Estimasi selesai: setelah konfirmasi admin",108,noteY+37);
+d.setDrawColor(20);d.line(10,279,200,279);
+d.setFont("helvetica","normal");d.setFontSize(8);d.text("@_sandikale",75,289,{align:"center"});d.text("+62 822-6641-2844",150,289,{align:"center"});
 d.save((o.spk_number||"SPK-SANDIKALE")+".pdf");
 if(o.tracking_code){const pdf64=d.output("datauristring").split(",")[1];const{error:archiveError}=await supabase.functions.invoke("showroom-public-api",{body:{action:"save_spk",tracking_code:o.tracking_code,pdf_base64:pdf64}});if(archiveError)sError("SPK terunduh, tetapi arsip server belum tersimpan: "+archiveError.message)}
 }
