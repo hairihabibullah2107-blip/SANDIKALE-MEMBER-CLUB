@@ -1,0 +1,1 @@
+drop index if exists public.showroom_spk_documents_order_type_revision_uidx;
