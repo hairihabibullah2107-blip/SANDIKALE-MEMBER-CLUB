@@ -25,22 +25,20 @@ d.setFont("helvetica","normal");d.setFontSize(7.5);d.text("D E S I G N   &   P R
 d.setLineWidth(.45);d.setDrawColor(20);d.line(10,29,200,29);
 const items=o.items||[],first=items[0]||{},sizes=items.flatMap(it=>it.sizes||[]).reduce((a,x)=>{a[x.size]=(a[x.size]||0)+Number(x.quantity||0);return a},{}),sizeText=Object.entries(sizes).map(([k,v])=>k+":"+v).join(", ")||"-";
 const info=[
-["BRAND",o.customer?.organization||o.customer_name||customer.name||"-","COLOR",first.color||"Sesuai pilihan"],
-["MODEL",first.model||"OBLONG","DESIGNER","SANDIKALE"],
-["MATERIAL",first.material||"Sesuai katalog","SABLON",first.printing_method||"DTF"],
-["DATE",new Date().toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase(),"SIZE",sizeText],
-["ORDER",o.order_number||"-","QTY",String(o.total_quantity||items.reduce((a,x)=>a+(+x.quantity||0),0))+" PCS"]
+[["BRAND",o.customer?.organization||o.customer?.name||o.customer_name||customer.name||"-"],["COLOR",first.color||"Hitam"],["SIZE",sizeText]],
+[["MODEL",first.model||"OBLONG"],["DESIGNER","SANDIKALE"],["SABLON",first.printing_method||"DTF"]],
+[["MATERIAL",first.material||"Sesuai katalog"],["DATE",new Date().toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase()],["QTY",String(o.total_quantity||items.reduce((a,x)=>a+(+x.quantity||0),0))+" PCS"]]
 ];
-const tx=10,ty=31,tw=190,rh=8.7,leftW=34,midW=78;
-d.setFontSize(6.7);info.forEach((row,i)=>{const y=ty+i*rh;d.setDrawColor(25);d.rect(tx,y,tw,rh);d.line(tx+leftW,y,tx+leftW,y+rh);d.line(tx+leftW+midW,y,tx+leftW+midW,y+rh);d.setFont("helvetica","bold");d.text(row[0],tx+2,y+5.7);d.text(row[2],tx+leftW+2,y+5.7);d.setFont("helvetica","normal");d.text(String(row[1]).slice(0,29),tx+leftW+16,y+5.7);d.text(String(row[3]).slice(0,24),tx+leftW+midW+16,y+5.7)});
+const tx=10,ty=31,tw=190,rh=11,cw=tw/3;
+info.forEach((row,i)=>{const y=ty+i*rh;d.setDrawColor(25);d.rect(tx,y,tw,rh);row.forEach((cell,j)=>{const x=tx+j*cw;if(j)d.line(x,y,x,y+rh);d.setFont("helvetica","bold");d.setFontSize(5.8);d.text(cell[0],x+2,y+6.8);d.setFont("helvetica","normal");d.setFontSize(6.1);d.text(String(cell[1]).slice(0,26),x+19,y+6.8)})});
 async function imageData(url){if(!url)return null;try{const response=await fetch(url);if(!response.ok)return null;const blob=await response.blob();return await new Promise(resolve=>{const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas");canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;canvas.getContext("2d").drawImage(img,0,0);resolve(canvas.toDataURL("image/jpeg",.9))};img.onerror=()=>resolve(null);img.src=String(reader.result)};reader.onerror=()=>resolve(null);reader.readAsDataURL(blob)})}catch{return null}}
-const top=ty+info.length*rh+3,boxY=top,boxH=85,boxW=88;
+const top=ty+info.length*rh+3,boxY=top,boxH=88,boxW=88;
 async function shirt(it,index,label,x){
 d.setDrawColor(205);d.rect(x,boxY,boxW,boxH);
 const data=await imageData(index===0?it.front_image_url:it.back_image_url)||await imageData(it.image_url);
-if(data){try{d.addImage(data,"JPEG",x+3,boxY+2,boxW-6,boxH-7,undefined,"FAST","NONE")}catch{d.setFontSize(7);d.text("FOTO MOCKUP TIDAK TERBACA",x+boxW/2,boxY+boxH/2,{align:"center"})}}
+if(data){try{d.addImage(data,"JPEG",x+3,boxY+2,boxW-6,boxH-7)}catch{d.setFontSize(7);d.text("FOTO MOCKUP TIDAK TERBACA",x+boxW/2,boxY+boxH/2,{align:"center"})}}
 else{d.setFont("helvetica","bold");d.setFontSize(8);d.text("FOTO MOCKUP "+label,x+boxW/2,boxY+boxH/2,{align:"center"});d.setFont("helvetica","normal");d.setFontSize(6);d.text("Unggah foto depan/belakang melalui admin",x+boxW/2,boxY+boxH/2+6,{align:"center"})}
-if(designPreview&&((index===0&&!String(it.placement||"").toLowerCase().includes("belakang"))||(index===1&&String(it.placement||"").toLowerCase().includes("belakang")))){try{const pos=(it.placement||"").toLowerCase().includes("dada")?{x:x+boxW*.58,y:boxY+boxH*.31,w:10,h:10}:{x:x+boxW*.38,y:boxY+boxH*.37,w:22,h:22};d.addImage(designPreview,designPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",pos.x,pos.y,pos.w,pos.h,undefined,"FAST")}catch{}}
+if(designPreview&&((index===0&&!String(it.placement||"").toLowerCase().includes("belakang"))||(index===1&&String(it.placement||"").toLowerCase().includes("belakang")))){try{const pos=(it.placement||"").toLowerCase().includes("dada")?{x:x+boxW*.58,y:boxY+boxH*.31,w:10,h:10}:{x:x+boxW*.38,y:boxY+boxH*.37,w:22,h:22};d.addImage(designPreview,designPreview.startsWith("data:image/jpeg")?"JPEG":"PNG",pos.x,pos.y,pos.w,pos.h)}catch{}}
 d.setFont("helvetica","bold");d.setFontSize(7);d.text(label,x+boxW/2,boxY+boxH-2,{align:"center"});
 }
 await shirt(first,0,"DEPAN",14);await shirt(first,1,"BELAKANG",108);
