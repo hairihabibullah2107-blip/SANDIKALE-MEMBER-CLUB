@@ -113,3 +113,18 @@ footer{position:relative;grid-template-columns:1fr 1fr;padding:55px 9vw 40px;bac
  .modalinfo>label{font-size:10px}
  .checkout-note{padding:13px}
 }
+
+
+/* Print specification: fixed DTF and multi-placement controls */
+.position-picker{display:grid;gap:8px;margin:5px 0 2px}
+.position-picker>span{font-size:9px;font-weight:700;letter-spacing:.12em;color:#77766e}
+.position-picker>.field-hint{margin-bottom:3px}
+.position-option{display:grid!important;grid-template-columns:18px 1fr auto;align-items:center;gap:10px!important;padding:11px 12px;background:#fff;border:1px solid #deddd6;cursor:pointer;text-transform:none!important;letter-spacing:0!important}
+.position-option input{width:15px;height:15px;margin:0;accent-color:#a33b30}
+.position-option>span{font-size:11px!important;color:#292823!important;font-weight:600;letter-spacing:0!important}
+.position-option small{font-size:8px;color:#a33b30;letter-spacing:.12em}
+.position-option:has(input:checked){border-color:#a33b30;background:#f9f2ef}
+.mockup-preview{display:block;width:100%;height:auto;object-fit:contain;max-height:410px}
+.modalart{position:relative;display:flex;align-items:center;justify-content:center}
+.mockup-artwork{position:absolute;height:auto;max-height:28%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
+@media(max-width:760px){.mockup-preview{max-height:280px}.position-option{padding:10px}}
