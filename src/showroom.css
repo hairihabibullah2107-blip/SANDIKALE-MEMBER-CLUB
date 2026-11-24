@@ -525,3 +525,8 @@ footer>small{grid-column:1/-1}
 .artwork-transform-tools>div{display:flex;gap:5px;flex-wrap:wrap}
 .artwork-transform-tools button{padding:7px 9px;border:1px solid #c5c7b8;background:#f5f5ed;color:#26281f;font-size:8px;font-weight:900;transition:all .18s}
 .artwork-transform-tools button:hover{background:#c5ed4b;border-color:#c5ed4b;transform:translateY(-1px)}
+
+.custom-position-add{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:10px}
+.custom-position-add input{min-width:0;padding:10px;border:1px solid #cfd0c4;background:#f8f8f2;font-size:9px}
+.custom-position-add button{padding:10px;background:#171914;color:#c5ed4b;border:0;font-size:8px;font-weight:900;letter-spacing:.06em}
+@media(max-width:700px){.custom-position-add{grid-template-columns:1fr}.custom-position-add button{min-height:40px}}
