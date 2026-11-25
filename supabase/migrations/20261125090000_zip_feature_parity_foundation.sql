@@ -90,34 +90,34 @@ drop policy if exists showroom_reviews_public_read on public.showroom_product_re
 create policy showroom_reviews_public_read on public.showroom_product_reviews for select to anon, authenticated using (is_published = true);
 drop policy if exists showroom_reviews_admin_all on public.showroom_product_reviews;
 create policy showroom_reviews_admin_all on public.showroom_product_reviews for all to authenticated using (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 ) with check (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 );
 -- Admin-only operational tables; admin access is mediated by staff identity.
 drop policy if exists showroom_inventory_staff_all on public.showroom_inventory;
 create policy showroom_inventory_staff_all on public.showroom_inventory for all to authenticated using (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 ) with check (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 );
 drop policy if exists showroom_inventory_movements_staff_all on public.showroom_inventory_movements;
 create policy showroom_inventory_movements_staff_all on public.showroom_inventory_movements for all to authenticated using (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 ) with check (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 );
 drop policy if exists showroom_payment_methods_staff_all on public.showroom_payment_methods;
 create policy showroom_payment_methods_staff_all on public.showroom_payment_methods for all to authenticated using (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 ) with check (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 );
 drop policy if exists showroom_shipping_methods_staff_all on public.showroom_shipping_methods;
 create policy showroom_shipping_methods_staff_all on public.showroom_shipping_methods for all to authenticated using (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 ) with check (
- exists(select 1 from public.showroom_staff_profiles p where p.user_id=auth.uid() and p.is_active=true)
+ exists(select 1 from public.showroom_staff_profiles p where p.auth_user_id=auth.uid() and p.is_active=true)
 );
 -- Chat and bug reports intentionally have no direct public table access.
 revoke all on public.showroom_support_messages from anon, authenticated;
