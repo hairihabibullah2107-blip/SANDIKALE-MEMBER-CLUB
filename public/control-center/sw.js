@@ -1,4 +1,4 @@
-const CACHE = "sandikale-control-center-v2";
+const CACHE = "sandikale-control-center-v3";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", event => {
